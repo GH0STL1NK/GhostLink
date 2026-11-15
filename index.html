@@ -1,1 +1,918 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b09">
+  <title>GhostLink | Anonymous Community</title>
 
+  <style>
+    :root {
+      --bg: #080b09;
+      --panel: #101612;
+      --panel2: #151e18;
+      --green: #00ff78;
+      --green2: #00bd5b;
+      --blue: #2196ff;
+      --text: #e8f5ec;
+      --muted: #84958a;
+      --border: #23352a;
+      --red: #ff4141;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .header {
+      height: 70px;
+      background: #0c120e;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+    }
+
+    .logo {
+      color: var(--green);
+      font-size: 25px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .logo span {
+      color: white;
+    }
+
+    .online {
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 30px auto;
+      padding: 0 18px;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+    }
+
+    .sidebar {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      height: fit-content;
+    }
+
+    .sidebar h3 {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 17px;
+      letter-spacing: 1px;
+    }
+
+    .room {
+      width: 100%;
+      text-align: left;
+      padding: 13px;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      border-radius: 7px;
+      transition: .2s;
+    }
+
+    .room:hover {
+      background: var(--panel2);
+      border-color: var(--border);
+    }
+
+    .room.active {
+      background: #10251a;
+      color: var(--green);
+      border-color: var(--green2);
+    }
+
+    .main {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-height: 650px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .room-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .room-header h2 {
+      font-size: 19px;
+    }
+
+    .room-header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 20px;
+      min-height: 400px;
+      max-height: 500px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .message {
+      background: #141d17;
+      border: 1px solid #203328;
+      border-radius: 8px;
+      padding: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .message-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .username {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .username.ghostlink {
+      color: var(--blue);
+    }
+
+    .time {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .message-text {
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      margin: auto;
+      font-size: 14px;
+    }
+
+    .composer {
+      padding: 17px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+    }
+
+    .composer input {
+      flex: 1;
+      min-width: 0;
+      background: #080e0a;
+      border: 1px solid var(--border);
+      color: white;
+      padding: 14px;
+      border-radius: 7px;
+      outline: none;
+    }
+
+    .composer input:focus,
+    .login-box input:focus {
+      border-color: var(--green);
+    }
+
+    .send-btn,
+    .login-btn {
+      background: var(--green);
+      color: #001b0c;
+      border: none;
+      border-radius: 7px;
+      padding: 0 22px;
+      font-weight: bold;
+    }
+
+    .send-btn:hover,
+    .login-btn:hover {
+      background: #73ffae;
+    }
+
+    .composer-info {
+      color: var(--muted);
+      font-size: 11px;
+      padding: 0 18px 12px;
+      text-align: right;
+    }
+
+    .profile {
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+      padding-top: 17px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .profile strong {
+      display: block;
+      color: var(--green);
+      margin-top: 7px;
+      font-size: 14px;
+    }
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.94);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: #101812;
+      border: 1px solid var(--green2);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .login-logo {
+      font-size: 30px;
+      color: var(--green);
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin-bottom: 12px;
+    }
+
+    .login-box p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 15px 0 22px;
+    }
+
+    .login-box input {
+      width: 100%;
+      background: #080e0a;
+      border: 1px solid var(--border);
+      color: white;
+      padding: 14px;
+      border-radius: 7px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+    }
+
+    .login-error {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 13px;
+      min-height: 18px;
+      line-height: 1.5;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
+      text-align: center;
+      color: #526158;
+      font-size: 11px;
+      padding: 20px;
+    }
+
+    @media (max-width: 750px) {
+      .container {
+        grid-template-columns: 1fr;
+        margin-top: 15px;
+      }
+
+      .sidebar {
+        padding: 13px;
+      }
+
+      .sidebar h3 {
+        margin-bottom: 10px;
+      }
+
+      .room-list {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+      }
+
+      .room {
+        width: auto;
+        white-space: nowrap;
+        margin: 0;
+        padding: 10px 13px;
+      }
+
+      .profile {
+        display: none;
+      }
+
+      .main {
+        min-height: 570px;
+      }
+
+      .messages {
+        min-height: 350px;
+        padding: 13px;
+      }
+
+      .composer {
+        padding: 12px;
+      }
+
+      .send-btn {
+        padding: 0 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="logo">GHOST<span>LINK</span></div>
+    <div class="online">● COMMUNITY ONLINE</div>
+  </header>
+
+  <div class="container">
+
+    <aside class="sidebar">
+      <h3>CHAT ROOMS</h3>
+
+      <div class="room-list">
+        <button class="room active" data-room="general"># General</button>
+        <button class="room" data-room="cyber-security"># Cyber Security</button>
+        <button class="room" data-room="linux"># Linux</button>
+        <button class="room" data-room="programming"># Programming</button>
+        <button class="room" data-room="technology"># Technology</button>
+      </div>
+
+      <div class="profile">
+        YOUR IDENTITY
+        <strong id="profileName">Connecting...</strong>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <div class="room-header">
+        <div>
+          <h2 id="roomTitle"># General</h2>
+          <p>Public community chat</p>
+        </div>
+
+        <div class="online">● LIVE</div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="empty">Connecting to GhostLink...</div>
+      </div>
+
+      <div class="composer">
+        <input
+          type="text"
+          id="messageInput"
+          maxlength="2000"
+          placeholder="Write a message..."
+          autocomplete="off"
+          disabled
+        >
+
+        <button class="send-btn" id="sendButton" disabled>
+          SEND
+        </button>
+      </div>
+
+      <div class="composer-info">
+        Maximum 2000 characters
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    GHOSTLINK — NO IDENTITY. NO LIMITS. JUST GHOSTS.
+  </footer>
+
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+
+      <div class="login-logo">GHOSTLINK</div>
+
+      <h2>Enter the community</h2>
+
+      <p>
+        Choose a unique username to join the GhostLink community.
+        Your username must contain 3–20 letters, numbers or underscores.
+      </p>
+
+      <input
+        type="text"
+        id="usernameInput"
+        maxlength="20"
+        placeholder="Choose your username"
+        autocomplete="off"
+      >
+
+      <button class="login-btn" id="loginButton">
+        JOIN GHOSTLINK
+      </button>
+
+      <div class="login-error" id="loginError"></div>
+
+    </div>
+  </div>
+
+  <script type="module">
+
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      runTransaction,
+      collection,
+      query,
+      orderBy,
+      limit,
+      onSnapshot,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+
+    // FIREBASE CONFIGURATION
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+
+    // INITIALIZATION
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentUsername = null;
+    let currentRoom = "general";
+    let unsubscribeMessages = null;
+    let sending = false;
+
+
+    // HTML ELEMENTS
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const usernameInput = document.getElementById("usernameInput");
+    const loginButton = document.getElementById("loginButton");
+    const loginError = document.getElementById("loginError");
+    const profileName = document.getElementById("profileName");
+    const messagesElement = document.getElementById("messages");
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const roomTitle = document.getElementById("roomTitle");
+
+
+    // AUTHENTICATION
+
+    async function startAuthentication() {
+      try {
+        await signInAnonymously(auth);
+      } catch (error) {
+        console.error(error);
+        loginError.textContent =
+          "Authentication failed. Check Firebase settings.";
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+
+      currentUser = user;
+
+      if (!user) {
+        currentUsername = null;
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+        loginOverlay.classList.remove("hidden");
+        startAuthentication();
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          currentUsername = userSnap.data().username;
+          showCommunity();
+        } else {
+          currentUsername = null;
+          loginOverlay.classList.remove("hidden");
+        }
+
+      } catch (error) {
+        console.error(error);
+        loginError.textContent =
+          "Could not load your profile. Check Firestore rules.";
+      }
+
+    });
+
+
+    // USERNAME REGISTRATION
+
+    loginButton.addEventListener("click", registerUsername);
+
+    usernameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        registerUsername();
+      }
+    });
+
+    async function registerUsername() {
+
+      if (!currentUser) {
+        loginError.textContent =
+          "Please wait for authentication.";
+        return;
+      }
+
+      const name = usernameInput.value.trim();
+      const usernamePattern = /^[A-Za-z0-9_]+$/;
+
+      if (name.length < 3 || name.length > 20) {
+        loginError.textContent =
+          "Username must be between 3 and 20 characters.";
+        return;
+      }
+
+      if (!usernamePattern.test(name)) {
+        loginError.textContent =
+          "Use only English letters, numbers and underscores.";
+        return;
+      }
+
+      loginButton.disabled = true;
+      loginButton.textContent = "PLEASE WAIT...";
+      loginError.textContent = "";
+
+      try {
+
+        const uid = currentUser.uid;
+        const userRef = doc(db, "users", uid);
+
+        // Case-sensitive username
+        const usernameKey = name;
+        const usernameRef = doc(db, "usernames", usernameKey);
+
+        await runTransaction(db, async (transaction) => {
+
+          const existingUsername =
+            await transaction.get(usernameRef);
+
+          const existingUser =
+            await transaction.get(userRef);
+
+          if (existingUser.exists()) {
+            throw new Error("PROFILE_ALREADY_EXISTS");
+          }
+
+          if (existingUsername.exists()) {
+            throw new Error("USERNAME_TAKEN");
+          }
+
+          const profileData = {
+            uid: uid,
+            username: name,
+            usernameKey: usernameKey,
+            createdAt: serverTimestamp()
+          };
+
+          transaction.set(userRef, profileData);
+
+          transaction.set(usernameRef, {
+            uid: uid,
+            username: name,
+            usernameKey: usernameKey,
+            createdAt: serverTimestamp()
+          });
+
+        });
+
+        currentUsername = name;
+        showCommunity();
+
+      } catch (error) {
+
+        console.error(error);
+
+        if (error.message === "USERNAME_TAKEN") {
+          loginError.textContent =
+            "This username is already taken.";
+        } else if (error.message === "PROFILE_ALREADY_EXISTS") {
+          loginError.textContent =
+            "Your profile already exists. Reload the page.";
+        } else {
+          loginError.textContent =
+            "Registration failed. Check your Firebase configuration and rules.";
+        }
+
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "JOIN GHOSTLINK";
+      }
+
+    }
+
+
+    // SHOW COMMUNITY
+
+    function showCommunity() {
+
+      if (!currentUsername) return;
+
+      loginOverlay.classList.add("hidden");
+      profileName.textContent = currentUsername;
+
+      messageInput.disabled = false;
+      sendButton.disabled = false;
+
+      loadMessages(currentRoom);
+
+    }
+
+
+    // ROOM SWITCHING
+
+    document.querySelectorAll(".room").forEach((button) => {
+
+      button.addEventListener("click", () => {
+
+        document.querySelectorAll(".room").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        currentRoom = button.dataset.room;
+
+        roomTitle.textContent =
+          "# " + button.textContent.replace("#", "").trim();
+
+        loadMessages(currentRoom);
+
+      });
+
+    });
+
+
+    // REAL-TIME MESSAGES
+
+    function loadMessages(room) {
+
+      if (!currentUser || !currentUsername) return;
+
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+      }
+
+      messagesElement.innerHTML = "";
+
+      const messagesRef =
+        collection(db, "rooms", room, "messages");
+
+      const messagesQuery = query(
+        messagesRef,
+        orderBy("createdAt", "desc"),
+        limit(100)
+      );
+
+      unsubscribeMessages = onSnapshot(
+        messagesQuery,
+
+        (snapshot) => {
+
+          messagesElement.innerHTML = "";
+
+          if (snapshot.empty) {
+
+            const empty = document.createElement("div");
+            empty.className = "empty";
+            empty.textContent =
+              "No messages yet. Start the conversation.";
+
+            messagesElement.appendChild(empty);
+            return;
+
+          }
+
+          const docs = [...snapshot.docs].reverse();
+
+          docs.forEach((messageDoc) => {
+
+            const data = messageDoc.data();
+
+            const message = document.createElement("div");
+            message.className = "message";
+
+            const top = document.createElement("div");
+            top.className = "message-top";
+
+            const username = document.createElement("span");
+
+            // GhostLink blue, all other usernames green.
+            username.className =
+              data.username === "GhostLink"
+                ? "username ghostlink"
+                : "username";
+
+            username.textContent = data.username || "Unknown";
+
+            const time = document.createElement("span");
+            time.className = "time";
+
+            if (data.createdAt && data.createdAt.toDate) {
+              time.textContent =
+                data.createdAt.toDate().toLocaleTimeString(
+                  "tr-TR",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }
+                );
+            } else {
+              time.textContent = "Sending...";
+            }
+
+            const text = document.createElement("div");
+            text.className = "message-text";
+            text.textContent = data.text || "";
+
+            top.appendChild(username);
+            top.appendChild(time);
+
+            message.appendChild(top);
+            message.appendChild(text);
+
+            messagesElement.appendChild(message);
+
+          });
+
+          messagesElement.scrollTop =
+            messagesElement.scrollHeight;
+
+        },
+
+        (error) => {
+
+          console.error(error);
+
+          messagesElement.innerHTML = "";
+
+          const errorBox = document.createElement("div");
+          errorBox.className = "empty";
+          errorBox.textContent =
+            "Messages could not be loaded. Check Firestore rules.";
+
+          messagesElement.appendChild(errorBox);
+
+        }
+
+      );
+
+    }
+
+
+    // SEND MESSAGE
+
+    sendButton.addEventListener("click", sendMessage);
+
+    messageInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    async function sendMessage() {
+
+      if (sending) return;
+
+      if (!currentUser || !currentUsername) return;
+
+      const text = messageInput.value.trim();
+
+      if (text.length < 1) return;
+
+      if (text.length > 2000) {
+        alert("Messages can contain a maximum of 2000 characters.");
+        return;
+      }
+
+      sending = true;
+      sendButton.disabled = true;
+
+      try {
+
+        const messagesRef =
+          collection(db, "rooms", currentRoom, "messages");
+
+        await addDoc(messagesRef, {
+
+          uid: currentUser.uid,
+          username: currentUsername,
+          text: text,
+          createdAt: serverTimestamp()
+
+        });
+
+        messageInput.value = "";
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Message could not be sent. Check your connection and Firestore rules."
+        );
+
+      } finally {
+
+        sending = false;
+        sendButton.disabled = false;
+        messageInput.focus();
+
+      }
+
+    }
+
+  </script>
+
+</body>
+  </html>
