@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GhostLink</title>
 <style>
-:root{--bg:#050805;--panel:#0a110a;--line:#16341c;--g:#2dff6a;--gd:#1f9e45;--txt:#b9f5c8;--mut:#4f7d5a;--red:#ff4d4d}
+:root{--bg:#050805;--panel:#0a110a;--line:#16341c;--g:#2dff6a;--gd:#1f9e45;--txt:#b9f5c8;--mut:#4f7d5a;--red:#ff4d4d;--blue:#4da6ff}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--txt);font-family:"Courier New",Consolas,monospace}
@@ -21,16 +21,20 @@ button,input{font:inherit}
 .prompt{color:var(--gd);font-size:13px;margin-bottom:4px}
 input{width:100%;padding:12px;background:#000;border:1px solid var(--line);color:var(--g);outline:none;caret-color:var(--g)}
 input:focus{border-color:var(--g)}
+input:disabled{opacity:.5;cursor:not-allowed}
 button{cursor:pointer;border:1px solid var(--g);background:transparent;color:var(--g);padding:12px;font-weight:700;letter-spacing:1px}
 button:hover:not(:disabled){background:var(--g);color:#000}
 button:disabled{opacity:.4;cursor:not-allowed}
 .box button{width:100%;margin-top:12px}
+.box .adminBtn{border-color:var(--blue);color:var(--blue)}
+.box .adminBtn:hover:not(:disabled){background:var(--blue);color:#000}
 #error{color:var(--red);font-size:13px;margin-top:12px;min-height:18px;overflow-wrap:anywhere}
 
 #app{height:100dvh;display:flex;flex-direction:column}
 header{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--panel);border-bottom:1px solid var(--line)}
 header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 .who{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut)}
+.who .isAdminLabel{color:var(--blue);font-weight:700}
 .who button{padding:7px 10px;font-size:12px}
 .layout{flex:1;min-height:0;display:flex}
 .side{width:200px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);padding:12px 8px;overflow-y:auto}
@@ -38,6 +42,12 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 .room{width:100%;display:block;text-align:left;border:0;border-left:3px solid transparent;color:var(--gd);padding:12px 10px;margin:2px 0;font-weight:400;letter-spacing:0}
 .room.active{border-left-color:var(--g);background:rgba(45,255,106,.08);color:var(--g)}
 .room:hover:not(:disabled){background:rgba(45,255,106,.14);color:var(--g)}
+.room.special{color:#ffd166}
+.room.special.active{border-left-color:#ffd166;background:rgba(255,209,102,.08);color:#ffd166}
+.room.special:hover:not(:disabled){background:rgba(255,209,102,.16);color:#ffd166}
+.room.adminRoom{color:var(--blue)}
+.room.adminRoom.active{border-left-color:var(--blue);background:rgba(77,166,255,.1);color:var(--blue)}
+.room.adminRoom:hover:not(:disabled){background:rgba(77,166,255,.18);color:var(--blue)}
 .chat{flex:1;min-width:0;display:flex;flex-direction:column}
 .head{padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
 .head strong{color:var(--g)}
@@ -48,7 +58,10 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 .msg .meta{font-size:11px;color:var(--mut)}
 .msg .nick{color:var(--g);font-weight:700}
 .msg.me .nick{color:#7dffe1}
+.msg.adm .nick{color:var(--blue)}
+.msg .badge{color:var(--blue);font-weight:700;margin-left:6px}
 .msg .text{white-space:pre-wrap;padding-left:12px;border-left:2px solid var(--line)}
+.msg.adm .text{border-left-color:var(--blue)}
 .empty{margin:auto;color:var(--mut);font-size:13px;text-align:center}
 #sendArea{display:flex;gap:8px;padding:10px;background:var(--panel);border-top:1px solid var(--line)}
 #sendArea input{flex:1;min-width:0}
@@ -57,7 +70,7 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
  .side{width:118px;padding:10px 4px}
  .room{font-size:12px;padding:11px 6px}
  .side h3{font-size:10px}
- .who span{display:none}
+ .who .nameLabel{display:none}
 }
 @media(prefers-reduced-motion:no-preference){.cursor{animation:blink 1s steps(1) infinite}}
 @keyframes blink{50%{opacity:0}}
@@ -72,6 +85,7 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
   <div class="prompt">&gt; kullanıcı adı</div>
   <input id="username" maxlength="24" placeholder="İsmini yaz (3-24 karakter)" autocomplete="off">
   <button id="enterBtn">SOHBETE GİR</button>
+  <button class="adminBtn" id="adminBtn">ADMIN GİRİŞİ</button>
   <div id="error"></div>
  </div>
 </section>
@@ -79,7 +93,11 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 <section id="app" class="hidden">
  <header>
   <strong>GHOSTLINK</strong>
-  <div class="who"><span id="currentName"></span><button id="logout">ÇIKIŞ</button></div>
+  <div class="who">
+   <span class="nameLabel" id="currentName"></span>
+   <span class="isAdminLabel hidden" id="adminLabel">ADMIN</span>
+   <button id="logout">ÇIKIŞ</button>
+  </div>
  </header>
  <div class="layout">
   <aside class="side">
@@ -103,7 +121,7 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {getAuth,signInAnonymously,signOut,onAuthStateChanged,updateProfile}
+import {getAuth,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut,onAuthStateChanged,updateProfile}
  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {getFirestore,collection,addDoc,query,where,limit,onSnapshot,serverTimestamp}
  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -118,38 +136,61 @@ const firebaseConfig={
  measurementId:"G-BS8HBQQQB3"
 };
 
+const ADMIN_EMAIL="mhrrmovamin60@gmail.com";
+
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
+const provider=new GoogleAuthProvider();
+provider.setCustomParameters({prompt:"select_account"});
 const $=id=>document.getElementById(id);
 
 const ROOMS=[
- {id:"general",title:"# general",label:"General",desc:"Herkese açık genel sohbet"},
- {id:"cyber-security",title:"# cyber-security",label:"Cyber Security",desc:"Siber güvenlik, savunma ve haberler"},
- {id:"linux",title:"# linux",label:"Linux",desc:"Dağıtımlar, terminal ve sistem yönetimi"},
- {id:"programming",title:"# programming",label:"Programming",desc:"Kod, algoritma ve projeler"},
- {id:"technology",title:"# technology",label:"Technology",desc:"Teknoloji dünyasından konuşmalar"}
+ {id:"general",title:"# general",label:"General",desc:"Herkese açık genel sohbet",type:"normal"},
+ {id:"cyber-security",title:"# cyber-security",label:"Cyber Security",desc:"Siber güvenlik, savunma ve haberler",type:"normal"},
+ {id:"linux",title:"# linux",label:"Linux",desc:"Dağıtımlar, terminal ve sistem yönetimi",type:"normal"},
+ {id:"programming",title:"# programming",label:"Programming",desc:"Kod, algoritma ve projeler",type:"normal"},
+ {id:"technology",title:"# technology",label:"Technology",desc:"Teknoloji dünyasından konuşmalar",type:"normal"},
+ {id:"announcements",title:"📢 duyurular",label:"📢 Duyurular",desc:"Duyuruları herkes okuyabilir. Yalnızca admin yazabilir.",type:"announce"},
+ {id:"admin-chat",title:"🛡 admin-sohbeti",label:"🛡 Admin Sohbeti",desc:"Yalnızca adminler görebilir ve yazabilir.",type:"admin"}
 ];
 
 let activeRoom="general";
+let isAdmin=false;
 let stop=null;
 
-const roomsBox=$("rooms");
-ROOMS.forEach(r=>{
- const b=document.createElement("button");
- b.className="room";
- b.dataset.room=r.id;
- b.textContent="> "+r.label;
- b.onclick=()=>selectRoom(r.id);
- roomsBox.appendChild(b);
-});
+const isAdminUser=u=>!!u && !u.isAnonymous && (u.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
+
+function visibleRooms(){
+ return ROOMS.filter(r=>r.type!=="admin"||isAdmin);
+}
+
+function buildRooms(){
+ const box=$("rooms");
+ box.replaceChildren();
+ visibleRooms().forEach(r=>{
+  const b=document.createElement("button");
+  b.className="room"+(r.type==="announce"?" special":"")+(r.type==="admin"?" adminRoom":"");
+  b.dataset.room=r.id;
+  b.textContent=r.type==="normal"?"> "+r.label:r.label;
+  b.onclick=()=>selectRoom(r.id);
+  box.appendChild(b);
+ });
+}
 
 function selectRoom(id){
- activeRoom=id;
  const r=ROOMS.find(x=>x.id===id);
+ if(!r||(r.type==="admin"&&!isAdmin))return;
+ activeRoom=id;
  document.querySelectorAll(".room").forEach(b=>b.classList.toggle("active",b.dataset.room===id));
  $("roomTitle").textContent=r.title;
  $("roomDesc").textContent=r.desc;
+
+ const canSend=isAdmin||r.type==="normal";
+ $("messageInput").disabled=!canSend;
+ $("sendArea").querySelector("button").disabled=!canSend;
+ $("messageInput").placeholder=canSend?"Mesaj yaz...":"Bu odada yalnızca admin mesaj yazabilir.";
+
  loadMessages();
 }
 
@@ -169,7 +210,7 @@ function loadMessages(){
   if(!docs.length){
    const e=document.createElement("div");
    e.className="empty";
-   e.textContent="Bu odada henüz mesaj yok. İlk mesajı sen yaz.";
+   e.textContent="Bu odada henüz mesaj yok.";
    area.appendChild(e);
   }
 
@@ -177,15 +218,22 @@ function loadMessages(){
   docs.forEach(d=>{
    const m=d.data();
    const row=document.createElement("div");
-   row.className="msg"+(m.uid===me?" me":"");
+   row.className="msg"+(m.uid===me?" me":"")+(m.isAdmin===true?" adm":"");
 
    const meta=document.createElement("div");
    meta.className="meta";
    const nick=document.createElement("span");
    nick.className="nick";
    nick.textContent=m.name||"anon";
+   meta.appendChild(nick);
+   if(m.isAdmin===true){
+    const badge=document.createElement("span");
+    badge.className="badge";
+    badge.textContent="[ADMIN]";
+    meta.appendChild(badge);
+   }
    const t=m.createdAt?.toDate?.();
-   meta.append(nick,t?" "+t.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):" ...");
+   meta.append(t?" "+t.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):" ...");
 
    const text=document.createElement("div");
    text.className="text";
@@ -203,15 +251,20 @@ function loadMessages(){
 }
 
 function enterApp(user){
+ isAdmin=isAdminUser(user);
  $("loginScreen").classList.add("hidden");
  $("app").classList.remove("hidden");
- $("currentName").textContent=user.displayName||"anon";
- selectRoom(activeRoom);
+ $("currentName").textContent=isAdmin?"":(user.displayName||"anon");
+ $("adminLabel").classList.toggle("hidden",!isAdmin);
+ buildRooms();
+ selectRoom("general");
 }
 
+// NORMAL GİRİŞ
 $("enterBtn").onclick=async()=>{
  const name=$("username").value.trim();
  if(name.length<3||name.length>24){$("error").textContent="İsim 3 ile 24 karakter arasında olmalı.";return;}
+ if(name.toLowerCase()==="admin"){$("error").textContent="Bu kullanıcı adı kullanılamaz.";return;}
  $("enterBtn").disabled=true;
  $("error").textContent="giriş yapılıyor...";
  try{
@@ -227,18 +280,45 @@ $("enterBtn").onclick=async()=>{
 };
 $("username").addEventListener("keydown",e=>{if(e.key==="Enter")$("enterBtn").click();});
 
+// ADMIN GİRİŞİ (GOOGLE)
+$("adminBtn").onclick=async()=>{
+ $("adminBtn").disabled=true;
+ $("error").textContent="Google hesabı kontrol ediliyor...";
+ try{
+  const cred=await signInWithPopup(auth,provider);
+  if(!isAdminUser(cred.user)){
+   await signOut(auth);
+   $("error").textContent="Bu Google hesabının admin yetkisi yok.";
+   return;
+  }
+  $("error").textContent="";
+  enterApp(cred.user);
+ }catch(e){
+  $("error").textContent="Admin giriş hatası: "+e.message;
+ }finally{
+  $("adminBtn").disabled=false;
+ }
+};
+
+// MESAJ GÖNDER
 $("sendArea").onsubmit=async e=>{
  e.preventDefault();
  const user=auth.currentUser;
  const text=$("messageInput").value.trim();
  if(!user||!text)return;
- const name=user.displayName||"";
+
+ const r=ROOMS.find(x=>x.id===activeRoom);
+ if(!isAdmin&&r.type!=="normal")return;
+
+ const name=isAdmin?"ADMIN":(user.displayName||"");
  if(name.length<3){alert("Önce çıkış yapıp geçerli bir isimle tekrar gir.");return;}
+
  $("messageInput").value="";
  try{
   await addDoc(collection(db,"messages"),{
    uid:user.uid,
    name:name,
+   isAdmin:isAdmin,
    channel:activeRoom,
    text:text,
    createdAt:serverTimestamp()
@@ -249,15 +329,22 @@ $("sendArea").onsubmit=async e=>{
  }
 };
 
+// OTURUM DURUMU
 onAuthStateChanged(auth,user=>{
  if(!user){
   if(stop)stop();
   stop=null;
+  isAdmin=false;
   $("app").classList.add("hidden");
   $("loginScreen").classList.remove("hidden");
   return;
  }
- if(user.displayName)enterApp(user);
+ if(!user.isAnonymous&&!isAdminUser(user)){
+  signOut(auth);
+  $("error").textContent="Bu Google hesabının admin yetkisi yok.";
+  return;
+ }
+ if(isAdminUser(user)||user.displayName)enterApp(user);
 });
 
 $("logout").onclick=async()=>{
