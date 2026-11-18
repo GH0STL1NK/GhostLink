@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostLink // Secure Terminal v2.0</title>
+    <title>GhostLink // Secure Terminal</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
         body { background-color: #0b0f0b; color: #00ff66; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -12,11 +12,12 @@
         #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050705; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .auth-box { border: 1px solid #00ff66; padding: 30px; background: #0b0f0b; text-align: center; box-shadow: 0 0 25px rgba(0, 255, 102, 0.15); width: 380px; }
         .auth-box h2 { margin-bottom: 10px; font-size: 22px; letter-spacing: 3px; }
-        .auth-box p { font-size: 11px; color: #00aa44; margin-bottom: 20px; }
-        .auth-box input { width: 100%; padding: 12px; background: #000; border: 1px solid #00ff66; color: #00ff66; margin-bottom: 15px; outline: none; text-align: center; font-size: 15px; }
+        .auth-box p { font-size: 11px; color: #00aa44; margin-bottom: 20px; line-height: 1.4; }
+        .auth-box input { width: 100%; padding: 12px; background: #000; border: 1px solid #00ff66; color: #00ff66; margin-bottom: 12px; outline: none; text-align: center; font-size: 14px; }
         .auth-box input::placeholder { color: #005522; }
-        .auth-box button { width: 100%; padding: 12px; background: #00ff66; color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.2s; }
+        .auth-box button { width: 100%; padding: 12px; background: #00ff66; color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.2s; margin-top: 5px; }
         .auth-box button:hover { background: #00cc52; }
+        .toggle-mode { margin-top: 15px; font-size: 11px; color: #00aa44; cursor: pointer; text-decoration: underline; }
         #auth-error { color: #ff3333; font-size: 12px; margin-top: 12px; min-height: 16px; }
 
         /* ANA UYGULAMA */
@@ -30,7 +31,6 @@
         .room-item:hover { background: #0f1a0f; color: #00ff66; }
         .room-item.active { background: #142614; color: #00ff66; border-left: 3px solid #00ff66; }
         
-        /* Admin Odası Özel Stili */
         .room-item.admin-room { color: #3399ff; border-top: 1px solid #1a2633; margin-top: 10px; }
         .room-item.admin-room:hover { background: #0a141f; color: #66b3ff; }
         .room-item.admin-room.active { background: #0f1f33; color: #66b3ff; border-left: 3px solid #3399ff; }
@@ -48,7 +48,6 @@
         .message { background: #0f170f; border: 1px solid #1a331a; padding: 12px; max-width: 75%; word-break: break-word; border-radius: 2px; }
         .message.admin-msg { border-color: #1a334d; background: #0b1117; }
         
-        /* İSİM RENKLERİ */
         .name-admin { color: #3399ff !important; font-weight: bold; }
         .name-user { color: #00ff66 !important; font-weight: bold; }
         
@@ -57,7 +56,6 @@
         .message .text { font-size: 14px; color: #e0ffe0; line-height: 1.4; }
         .message .time { font-size: 10px; color: #006622; margin-top: 6px; text-align: right; }
 
-        /* MESAJ GÖNDERME ÇUBUĞU */
         .chat-input-area { padding: 20px; background: #070a07; border-top: 1px solid #1a331a; display: flex; gap: 10px; }
         .chat-input-area input { flex: 1; padding: 12px; background: #000; border: 1px solid #1a331a; color: #00ff66; outline: none; }
         .chat-input-area input:focus { border-color: #00ff66; }
@@ -72,11 +70,15 @@
     <!-- GİRİŞ EKRANI -->
     <div id="auth-screen">
         <div class="auth-box">
-            <h2>// GHOSTLINK_</h2>
-            <p>SECURE TERMINAL ACCESS</p>
-            <input type="text" id="username-input" placeholder="Rumuz (Büyük/küçük harf duyarlı)" autocomplete="off">
-            <input type="password" id="code-input" placeholder="Erişim Kodu (Access Code)" autocomplete="off" onkeypress="if(event.key==='Enter') loginUser()">
-            <button onclick="loginUser()">SİSTEME BAĞLAN</button>
+            <h2 id="auth-title">// GHOSTLINK_</h2>
+            <p id="auth-desc">E-posta ve şifrenizle giriş yapın.</p>
+            
+            <input type="text" id="username-input" placeholder="Rumuzunuz (Görünecek İsim)" autocomplete="off">
+            <input type="email" id="email-input" placeholder="E-posta Adresi" autocomplete="off">
+            <input type="password" id="password-input" placeholder="Şifre (En az 6 karakter)" autocomplete="off" onkeypress="if(event.key==='Enter') handleAuth()">
+            
+            <button id="auth-btn" onclick="handleAuth()">SİSTEME BAĞLAN</button>
+            <div class="toggle-mode" onclick="toggleMode()">Hesabın yok mu? Kayıt ol</div>
             <div id="auth-error"></div>
         </div>
     </div>
@@ -93,7 +95,6 @@
                     <li class="room-item" onclick="switchRoom('announcements', this)">
                         <span># duyurular</span>
                     </li>
-                    <!-- Sadece Yöneticiler İçin Görünür -->
                     <li class="room-item admin-room" id="admin-room-btn" style="display: none;" onclick="switchRoom('admin_hq', this)">
                         <span># yonetici-odasi</span>
                     </li>
@@ -123,10 +124,10 @@
     <!-- Firebase SDK (Modular v10) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore";
 
-        // KENDİ FIREBASE BİLGİLERİNİ BURAYA GİR
+        // KENDİ FIREBASE BİLGİLERİNİ BURAYA YAPIŞTIR
         const firebaseConfig = {
             apiKey: "SENIN_API_KEY",
             authDomain: "SENIN_AUTH_DOMAIN",
@@ -140,83 +141,76 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ==========================================
-        // ERİŞİM KODLARI (KENDİNE GÖRE DÜZENLEYEBİLİRSİN)
-        // ==========================================
-        const ACCESS_CODES = {
-            // Yönetici Kodları (Mavi İsim + Admin Odası + Duyuru Yetkisi)
-            "ROOT-999": "admin",
-            "ADMIN-007": "admin",
-            
-            // Normal Kullanıcı Kodları (Yeşil İsim + Genel Sohbet)
-            "GHOST-101": "user",
-            "GHOST-102": "user",
-            "USER-2026": "user"
-        };
-
         let currentUser = null;
-        let currentRole = null; // 'admin' veya 'user'
+        let currentRole = null; 
         let currentRoom = "general";
         let unsubscribeMessages = null;
+        let isRegisterMode = false;
 
-        // SİSTEME GİRİŞ
-        window.loginUser = async function() {
-            const rawName = document.getElementById('username-input').value.trim();
-            const accessCode = document.getElementById('code-input').value.trim();
+        window.toggleMode = function() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('auth-title').innerText = isRegisterMode ? "// GHOSTLINK_ KAYIT" : "// GHOSTLINK_";
+            document.getElementById('auth-desc').innerText = isRegisterMode ? "Yeni hesap oluşturarak sisteme katılın." : "E-posta ve şifrenizle giriş yapın.";
+            document.getElementById('auth-btn').innerText = isRegisterMode ? "KAYIT OL VE BAĞLAN" : "SİSTEME BAĞLAN";
+            document.querySelector('.toggle-mode').innerText = isRegisterMode ? "Zaten hesabın var mı? Giriş yap" : "Hesabın yok mu? Kayıt ol";
+            document.getElementById('auth-error').innerText = "";
+        };
+
+        window.handleAuth = async function() {
+            const username = document.getElementById('username-input').value.trim();
+            const email = document.getElementById('email-input').value.trim();
+            const password = document.getElementById('password-input').value.trim();
             const errorBox = document.getElementById('auth-error');
             errorBox.innerText = "";
 
-            if (!rawName || !accessCode) {
-                errorBox.innerText = "HATA: Rumuz ve Erişim Kodu zorunludur.";
+            if (!email || !password || (isRegisterMode && !username)) {
+                errorBox.innerText = "HATA: Tüm alanları doldurun.";
                 return;
             }
-
-            // 1. Kod Doğrulama
-            if (!ACCESS_CODES.hasOwnProperty(accessCode)) {
-                errorBox.innerText = "ERİŞİM REDDEDİLDİ: Geçersiz erişim kodu!";
-                return;
-            }
-
-            const assignedRole = ACCESS_CODES[accessCode];
 
             try {
-                // Firebase Anonim Kimlik Doğrulama
-                await signInAnonymously(auth);
-
-                // 2. İsim Benzersizlik Kontrolü ("Anonim" !== "anonim")
-                // Firestore doküman ID'si tam olarak kullanıcının yazdığı string olur.
-                // Bu sayede "Anonim" ve "anonim" iki farklı doküman ID'si olarak ayrı tutulur.
-                const userDocRef = doc(db, "active_users", rawName);
-                const userDocSnap = await getDoc(userDocRef);
-
-                if (userDocSnap.exists()) {
-                    errorBox.innerText = `HATA: "${rawName}" ismi şu anda kullanımda! Farklı bir isim seçin.`;
-                    return;
+                if (isRegisterMode) {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await setDoc(doc(db, "users", userCredential.user.uid), { username: username, email: email });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
                 }
-
-                // İsmi aktif kullanıcılar listesine kaydet
-                await setDoc(userDocRef, {
-                    username: rawName,
-                    role: assignedRole,
-                    joinedAt: serverTimestamp()
-                });
-
-                currentUser = rawName;
-                currentRole = assignedRole;
-
-                // Sayfa kapatıldığında ismi serbest bırakmaya çalış
-                window.addEventListener("beforeunload", () => {
-                    deleteDoc(doc(db, "active_users", currentUser));
-                });
-
-                setupUI();
             } catch (error) {
-                console.error("Giriş Hatası:", error);
-                errorBox.innerText = "Sistem bağlantı hatası: " + error.message;
+                console.error("Kimlik doğrulama hatası:", error);
+                errorBox.innerText = "Hata: " + error.message;
             }
         };
 
-        // ARAYÜZÜ YETKİYE GÖRE HAZIRLA
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // E-posta adresinin veritabanındaki "admins" koleksiyonunda olup olmadığını güvenle kontrol et
+                let isAdmin = false;
+                try {
+                    const adminDocRef = doc(db, "admins", user.email);
+                    const adminSnap = await getDoc(adminDocRef);
+                    if (adminSnap.exists() && adminSnap.data().role === 'admin') {
+                        isAdmin = true;
+                    }
+                } catch (e) {
+                    console.error("Admin yetkisi sorgulama hatası:", e);
+                }
+
+                currentRole = isAdmin ? 'admin' : 'user';
+
+                const userDocSnap = await getDoc(doc(db, "users", user.uid));
+                if (userDocSnap.exists()) {
+                    currentUser = userDocSnap.data().username;
+                } else {
+                    currentUser = user.email.split('@')[0];
+                }
+
+                setupUI();
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('app-container').style.display = 'none';
+            }
+        });
+
         function setupUI() {
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-container').style.display = 'flex';
@@ -230,7 +224,6 @@
                 nameSpan.className = 'name-admin';
                 roleSpan.innerText = 'YÖNETİCİ (ADMIN)';
                 roleSpan.style.color = '#3399ff';
-                // Yönetici odasını görünür yap
                 document.getElementById('admin-room-btn').style.display = 'flex';
             } else {
                 nameSpan.className = 'name-user';
@@ -242,9 +235,7 @@
             switchRoom('general', document.querySelector('.room-item.active'));
         }
 
-        // ODA DEĞİŞTİRME
         window.switchRoom = function(roomName, element) {
-            // Güvenlik Kontrolü: Normal kullanıcı admin odasına geçmeye çalışırsa engelle
             if (roomName === 'admin_hq' && currentRole !== 'admin') {
                 alert("YETKİSİZ ERİŞİM: Bu odaya sadece yöneticiler girebilir.");
                 return;
@@ -259,7 +250,6 @@
             const msgInput = document.getElementById('message-input');
             const sendBtn = document.getElementById('send-btn');
 
-            // Oda başlıkları ve yazma yetkileri
             if (roomName === 'general') {
                 titleEl.innerText = "# genel-sohbet";
                 titleEl.style.color = "#00ff66";
@@ -295,7 +285,6 @@
             loadMessages(roomName);
         };
 
-        // MESAJLARI VERİTABANINDAN DİNLEME
         function loadMessages(roomName) {
             const messagesContainer = document.getElementById('messages');
             messagesContainer.innerHTML = "";
@@ -336,13 +325,11 @@
             });
         }
 
-        // MESAJ GÖNDERME
         window.sendMessage = async function() {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
             if (!text || !currentUser) return;
 
-            // Yetki Kontrolü (Frontend Koruması)
             if ((currentRoom === 'announcements' || currentRoom === 'admin_hq') && currentRole !== 'admin') {
                 alert("Bu odaya mesaj gönderme yetkiniz yok!");
                 return;
@@ -358,15 +345,12 @@
                 input.value = "";
             } catch (error) {
                 console.error("Mesaj gönderme hatası:", error);
-                alert("Mesaj gönderilemedi! Firebase kurallarını kontrol edin.");
+                alert("Mesaj gönderilemedi!");
             }
         };
 
-        // OTURUMU KAPAT VE İSMİ SERBEST BIRAK
         window.logoutUser = async function() {
-            if (currentUser) {
-                await deleteDoc(doc(db, "active_users", currentUser));
-            }
+            await signOut(auth);
             location.reload();
         };
 
