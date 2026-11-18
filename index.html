@@ -3,280 +3,94 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#030806">
-<title>GhostLink Network</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GhostLink</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
-body{
- background:#030806;
- color:#00ff80;
- font-family:monospace;
- min-height:100vh;
-}
-
-header{
- text-align:center;
- padding:30px 12px;
- background:#07130c;
- border-bottom:1px solid #00ff8055;
-}
-
-header h1{
- font-size:38px;
- letter-spacing:6px;
- text-shadow:0 0 18px #00ff80;
-}
-
-.container{
- max-width:900px;
- margin:30px auto;
- padding:12px;
-}
-
-.panel{
- background:#08110c;
- border:1px solid #00ff8055;
- border-radius:12px;
- padding:22px;
- box-shadow:0 0 20px #00ff8015;
-}
-
-h2,h3{margin-bottom:16px}
-
-input,button{
- width:100%;
- padding:15px;
- margin-top:12px;
- background:#020604;
- color:#00ff80;
- border:1px solid #00ff8066;
- border-radius:7px;
- font-family:monospace;
- font-size:16px;
- outline:none;
-}
-
-input:focus{
- border-color:#00ff80;
- box-shadow:0 0 12px #00ff8033;
-}
-
-button{
- background:#06351e;
- cursor:pointer;
- font-weight:bold;
-}
-
-button:hover{
- background:#00ff80;
- color:#000;
-}
-
-button:disabled{
- opacity:.5;
-}
-
+*{box-sizing:border-box}
+body{margin:0;background:#08090d;color:#eee;font-family:Arial,sans-serif}
+button,input{font:inherit}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+.panel{width:100%;max-width:450px;background:#11131a;border:1px solid #282b36;border-radius:18px;padding:25px}
+.logo{text-align:center;font-size:34px;font-weight:900;letter-spacing:4px;color:#f22}
+.sub{text-align:center;color:#858a98;font-size:12px;margin:10px 0 28px}
+h2{text-align:center;font-size:21px}
+input{width:100%;padding:15px;background:#090a0e;border:1px solid #333744;border-radius:9px;color:white;outline:none;margin:10px 0}
+input:focus{border-color:#e33}
+button{width:100%;padding:14px;border:0;border-radius:9px;background:#d71920;color:white;font-weight:bold;cursor:pointer;margin-top:10px}
+button:disabled{opacity:.5}
+.adminBtn{background:#172b50;color:#64a4ff;border:1px solid #3478ed}
+.note{text-align:center;color:#777;font-size:12px;line-height:1.6;margin-top:18px}
+.error{color:#ff7777;font-size:13px;margin-top:12px;white-space:pre-wrap}
 .hidden{display:none!important}
-
-#authStatus{
- margin-top:15px;
- color:#ff6666;
- overflow-wrap:anywhere;
- line-height:1.5;
-}
-
-.rooms{
- display:flex;
- flex-wrap:wrap;
- gap:8px;
- margin:15px 0;
-}
-
-.rooms button{
- flex:1;
- min-width:105px;
-}
-
-.rooms button.active{
- background:#00ff80;
- color:#000;
-}
-
-#messages{
- height:350px;
- overflow-y:auto;
- background:#020604;
- border:1px solid #145d39;
- padding:12px;
- border-radius:6px;
-}
-
-.message{
- padding:12px;
- margin-bottom:10px;
- background:#0b1910;
- border-left:3px solid #00ff80;
- overflow-wrap:anywhere;
-}
-
-.username{
- color:#00ff80;
- font-weight:bold;
-}
-
-.admin{
- color:#3995ff;
- font-weight:bold;
-}
-
-.admin-badge{
- color:#3995ff;
- border:1px solid #3995ff;
- padding:2px 5px;
- border-radius:4px;
- font-size:10px;
- margin-left:6px;
-}
-
-.message small{
- display:block;
- color:#668875;
- margin-top:7px;
-}
-
-#chatForm{
- display:flex;
- gap:8px;
- margin-top:10px;
-}
-
-#chatForm input{flex:1}
-#chatForm button{width:85px}
-
-.status{
- color:#00ff80;
- margin-bottom:12px;
-}
-
-.admin-text{
- color:#3995ff;
- font-weight:bold;
-}
-
-footer{
- text-align:center;
- padding:30px;
- color:#426b53;
-}
-
-@media(max-width:500px){
- header h1{font-size:30px}
- .panel{padding:15px}
- #chatForm button{width:75px}
-}
+#chatScreen{min-height:100vh;display:flex;flex-direction:column}
+header{padding:16px;background:#11131a;border-bottom:1px solid #292d39;display:flex;align-items:center;justify-content:space-between}
+header strong{color:#f33;letter-spacing:2px}
+.headerRight{display:flex;align-items:center;gap:10px}
+.headerRight button{width:auto;margin:0;padding:9px 12px;background:#252936;font-size:12px}
+#messages{flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;max-width:800px;width:100%;margin:auto}
+.msg{background:#151821;border:1px solid #282d3a;padding:12px 14px;border-radius:12px;max-width:90%;overflow-wrap:anywhere}
+.msgTop{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px;color:#9da4b4}
+.adminTag{color:#55a0ff;font-weight:900;letter-spacing:1px}
+.msgText{white-space:pre-wrap;line-height:1.5}
+#sendArea{padding:14px;background:#11131a;border-top:1px solid #292d39;display:flex;gap:9px;max-width:800px;width:100%;margin:auto}
+#sendArea input{margin:0;min-width:0}
+#sendArea button{width:85px;margin:0}
+#status{font-size:12px;color:#9298a8;text-align:center;padding:7px}
 </style>
 </head>
-
 <body>
 
-<header>
- <h1>GHOSTLINK</h1>
-</header>
-
-<div class="container">
-
- <section id="loginPanel" class="panel">
-
-  <h2>IDENTITY VERIFICATION</h2>
-
-  <input
-   id="username"
-   type="text"
-   maxlength="25"
-   placeholder="Kullanıcı adınızı girin..."
-   autocomplete="off">
-
-  <button id="enterBtn">GİRİŞ YAP</button>
-
-  <p style="text-align:center;margin:17px;color:#456b51">
-   ───── VEYA ─────
-  </p>
-
-  <button id="adminBtn">
-   ADMIN GOOGLE LOGIN
-  </button>
-
-  <p id="authStatus" role="alert"></p>
-
- </section>
-
- <section id="chatPanel" class="panel hidden">
-
-  <div class="status">
-   ● SYSTEM ONLINE
-   <span id="currentUser"></span>
+<section class="screen" id="loginScreen">
+ <div class="panel">
+  <div class="logo">GHOSTLINK</div>
+  <div class="sub">PRIVATE CHAT NETWORK</div>
+  <div id="normalLogin">
+   <h2>Sohbete Katıl</h2>
+   <input id="username" maxlength="24" minlength="3" placeholder="İsmini yaz..." autocomplete="nickname">
+   <button id="enterBtn">GİR</button>
+   <button class="adminBtn" id="adminBtn">ADMIN GİRİŞİ</button>
+   <div class="note">Herkes için ücretsiz ve kolay kullanım.<br>Normal girişte e-posta veya şifre gerekmez.</div>
   </div>
+  <div id="loginError" class="error"></div>
+ </div>
+</section>
 
-  <button id="logoutBtn">ÇIKIŞ YAP</button>
-
-  <h3 style="margin-top:22px">CHAT CHANNELS</h3>
-
-  <div class="rooms">
-   <button data-room="General" class="active">General</button>
-   <button data-room="Cyber Security">Cyber Security</button>
-   <button data-room="Linux">Linux</button>
-   <button data-room="Programming">Programming</button>
-   <button data-room="Technology">Technology</button>
+<section id="chatScreen" class="hidden">
+ <header>
+  <strong>GHOSTLINK</strong>
+  <div class="headerRight">
+   <span id="currentName"></span>
+   <button id="logoutBtn">ÇIKIŞ</button>
   </div>
-
-  <h3 id="roomTitle"># General</h3>
-
-  <div id="messages">Bağlanıyor...</div>
-
-  <form id="chatForm">
-   <input
-    id="messageInput"
-    maxlength="1000"
-    placeholder="Mesajınızı yazın..."
-    autocomplete="off">
-
-   <button id="sendBtn" type="submit">GÖNDER</button>
-  </form>
-
- </section>
-
-</div>
-
-<footer>GHOSTLINK NETWORK © 2026</footer>
+ </header>
+ <div id="status">Sohbet yükleniyor...</div>
+ <main id="messages"></main>
+ <form id="sendArea">
+  <input id="messageInput" maxlength="2000" placeholder="Mesajını yaz..." autocomplete="off" required>
+  <button type="submit">GÖNDER</button>
+ </form>
+</section>
 
 <script type="module">
-
-import {initializeApp}
-from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-
-import {
- getAuth,
- signInAnonymously,
- GoogleAuthProvider,
- signInWithPopup,
- onAuthStateChanged,
- signOut
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {initializeApp} from
+"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
 import {
- getFirestore,
- collection,
- addDoc,
- query,
- where,
- onSnapshot,
- serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+ getAuth, signInAnonymously, GoogleAuthProvider,
+ signInWithPopup, signOut, onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-// FIREBASE CONFIG
+import {
+ getFirestore, collection, addDoc, query, orderBy,
+ limit, onSnapshot, serverTimestamp
+} from
+"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+import {
+ updateProfile
+} from
+"https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyAvoiBmcERGKNEkdXTVbpzyfbqkJn8x0DA",
@@ -288,321 +102,186 @@ const firebaseConfig = {
  measurementId: "G-BS8HBQQQB3"
 };
 
-// ADMIN
-
 const ADMIN_EMAIL = "mhrrmovamin60@gmail.com";
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({prompt:"select_account"});
 
 const $ = id => document.getElementById(id);
-
-let currentRoom = "General";
-let currentUsername = "";
-let isAdmin = false;
 let unsubscribeMessages = null;
+let currentUserIsAdmin = false;
 
-function error(message){
- $("authStatus").textContent = message;
+function showError(text){
+ $("loginError").textContent = text;
 }
 
-// NORMAL LOGIN
+function showChat(){
+ $("loginScreen").classList.add("hidden");
+ $("chatScreen").classList.remove("hidden");
+}
 
-$("enterBtn").onclick = async () => {
+function showLogin(){
+ $("chatScreen").classList.add("hidden");
+ $("loginScreen").classList.remove("hidden");
+}
 
- const username = $("username").value.trim();
+function startMessages(){
+ if(unsubscribeMessages) unsubscribeMessages();
 
- if(username.length < 2 || username.length > 25){
-  error("Kullanıcı adı 2-25 karakter olmalıdır.");
+ const q = query(
+  collection(db,"messages"),
+  orderBy("createdAt","asc"),
+  limit(100)
+ );
+
+ unsubscribeMessages = onSnapshot(q,snapshot=>{
+  const area = $("messages");
+  area.replaceChildren();
+
+  snapshot.forEach(item=>{
+   const data = item.data();
+
+   const card = document.createElement("div");
+   card.className = "msg";
+
+   const top = document.createElement("div");
+   top.className = "msgTop";
+
+   const name = document.createElement("strong");
+   name.textContent = data.name || "Kullanıcı";
+   top.appendChild(name);
+
+   if(data.isAdmin === true){
+    const badge = document.createElement("span");
+    badge.className = "adminTag";
+    badge.textContent = "ADMIN";
+    top.appendChild(badge);
+   }
+
+   const body = document.createElement("div");
+   body.className = "msgText";
+   body.textContent = data.text || "";
+
+   card.append(top,body);
+   area.appendChild(card);
+  });
+
+  area.scrollTop = area.scrollHeight;
+  $("status").textContent = "● Canlı sohbet";
+ },error=>{
+  $("status").textContent = "Sohbet yüklenemedi: " + error.message;
+ });
+}
+
+// NORMAL USER LOGIN
+$("enterBtn").onclick = async()=>{
+ const name = $("username").value.trim();
+
+ if(name.length < 3 || name.length > 24){
+  showError("İsim 3-24 karakter arasında olmalı.");
   return;
  }
 
- if(username.toUpperCase() === "ADMIN"){
-  error("Bu kullanıcı adı yöneticiye ayrılmıştır.");
+ if(name.toUpperCase() === "ADMIN"){
+  showError("Bu isim kullanılamaz.");
   return;
  }
-
- if(!/^[\p{L}\p{N}_ -]+$/u.test(username)){
-  error("Geçersiz kullanıcı adı.");
-  return;
- }
-
- $("enterBtn").disabled = true;
- error("");
 
  try{
+  $("enterBtn").disabled = true;
+  showError("Giriş yapılıyor...");
 
-  if(auth.currentUser){
-   await signOut(auth);
-  }
-
-  currentUsername = username;
-
-  localStorage.setItem("ghostlink_username",username);
-
-  await signInAnonymously(auth);
-
- }catch(e){
-
-  error("Firebase: "+e.code+" - "+e.message);
+  const result = await signInAnonymously(auth);
+  await updateProfile(result.user,{displayName:name});
+  currentUserIsAdmin = false;
+ }catch(error){
+  showError("Giriş hatası: " + error.message);
+ }finally{
   $("enterBtn").disabled = false;
-
  }
 };
 
 // ADMIN GOOGLE LOGIN
-
-$("adminBtn").onclick = async () => {
-
- $("adminBtn").disabled = true;
- error("");
-
+$("adminBtn").onclick = async()=>{
  try{
-
-  if(auth.currentUser){
-   await signOut(auth);
-  }
-
-  const provider = new GoogleAuthProvider();
-
-  provider.setCustomParameters({
-   prompt:"select_account"
-  });
+  $("adminBtn").disabled = true;
+  showError("Google hesabı doğrulanıyor...");
 
   const result = await signInWithPopup(auth,provider);
+  const email = result.user.email?.toLowerCase();
 
-  const email = (result.user.email || "").toLowerCase();
-
-  if(
-   email !== ADMIN_EMAIL.toLowerCase() ||
-   !result.user.emailVerified
-  ){
-
+  if(email !== ADMIN_EMAIL.toLowerCase()){
    await signOut(auth);
-
-   error("Bu Google hesabının yönetici yetkisi yok.");
-
+   showError("Bu Google hesabının admin yetkisi yok.");
+   return;
   }
 
- }catch(e){
-
-  error("Admin giriş hatası: "+e.code+" - "+e.message);
-
+  currentUserIsAdmin = true;
+ }catch(error){
+  showError("Admin giriş hatası: " + error.message);
  }finally{
-
   $("adminBtn").disabled = false;
-
  }
 };
 
 // AUTH STATE
-
-onAuthStateChanged(auth,user => {
-
- $("enterBtn").disabled = false;
-
+onAuthStateChanged(auth,user=>{
  if(!user){
-
-  $("loginPanel").classList.remove("hidden");
-  $("chatPanel").classList.add("hidden");
-
-  if(unsubscribeMessages){
-   unsubscribeMessages();
-   unsubscribeMessages = null;
-  }
-
+  currentUserIsAdmin = false;
+  if(unsubscribeMessages) unsubscribeMessages();
+  unsubscribeMessages = null;
+  showLogin();
   return;
  }
 
- if(user.isAnonymous){
+ const isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
-  isAdmin = false;
-
-  currentUsername =
-   localStorage.getItem("ghostlink_username") || "";
-
-  if(!currentUsername){
-   signOut(auth);
-   return;
-  }
-
- }else if(
-  user.email &&
-  user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
-  user.emailVerified
- ){
-
-  isAdmin = true;
-  currentUsername = "ADMIN";
-
- }else{
-
+ if(!user.isAnonymous && !isAdmin){
   signOut(auth);
+  showError("Yetkisiz hesap.");
   return;
-
  }
 
- $("loginPanel").classList.add("hidden");
- $("chatPanel").classList.remove("hidden");
-
- $("currentUser").textContent = " | "+currentUsername;
-
- $("currentUser").className =
-  isAdmin ? "admin-text" : "";
-
- loadMessages();
-
+ currentUserIsAdmin = isAdmin;
+ $("currentName").textContent = isAdmin ? "ADMIN" : (user.displayName || "Kullanıcı");
+ showChat();
+ startMessages();
 });
 
-// LOGOUT
-
-$("logoutBtn").onclick = async () => {
-
- localStorage.removeItem("ghostlink_username");
-
- await signOut(auth);
-
-};
-
-// LOAD MESSAGES
-
-function loadMessages(){
-
- if(unsubscribeMessages){
-  unsubscribeMessages();
- }
-
- $("messages").textContent = "Mesajlar yükleniyor...";
-
- const q = query(
-  collection(db,"messages"),
-  where("room","==",currentRoom)
- );
-
- unsubscribeMessages = onSnapshot(q,snapshot => {
-
-  const list = [];
-
-  snapshot.forEach(doc => {
-   list.push(doc.data());
-  });
-
-  list.sort((a,b) =>
-   (a.createdAt?.toMillis?.() || 0) -
-   (b.createdAt?.toMillis?.() || 0)
-  );
-
-  $("messages").innerHTML = "";
-
-  list.slice(-100).forEach(data => {
-
-   const message = document.createElement("div");
-   message.className = "message";
-
-   const name = document.createElement("span");
-
-   name.className = data.isAdmin ? "admin" : "username";
-   name.textContent = data.username || "Anonymous";
-
-   if(data.isAdmin){
-
-    const badge = document.createElement("span");
-    badge.className = "admin-badge";
-    badge.textContent = "ADMIN";
-
-    name.appendChild(badge);
-
-   }
-
-   const content = document.createElement("div");
-   content.textContent = data.text || "";
-
-   const time = document.createElement("small");
-
-   time.textContent = data.createdAt?.toDate
-    ? data.createdAt.toDate().toLocaleTimeString()
-    : "Gönderiliyor...";
-
-   message.append(name,content,time);
-
-   $("messages").appendChild(message);
-
-  });
-
-  $("messages").scrollTop = $("messages").scrollHeight;
-
- },e => {
-
-  $("messages").textContent =
-   "Firestore hatası: "+e.code;
-
- });
-
-}
-
 // SEND MESSAGE
-
-$("chatForm").onsubmit = async event => {
-
+$("sendArea").addEventListener("submit",async event=>{
  event.preventDefault();
 
  const text = $("messageInput").value.trim();
+ const user = auth.currentUser;
 
- if(!text || !auth.currentUser) return;
+ if(!user || !text) return;
 
- const button = $("sendBtn");
- button.disabled = true;
+ const isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
  try{
-
   await addDoc(collection(db,"messages"),{
-
-   uid:auth.currentUser.uid,
-   username:currentUsername,
+   uid:user.uid,
+   name:isAdmin ? "ADMIN" : (user.displayName || "Kullanıcı"),
    isAdmin:isAdmin,
    text:text,
-   room:currentRoom,
    createdAt:serverTimestamp()
-
   });
 
   $("messageInput").value = "";
-
- }catch(e){
-
-  alert("Mesaj hatası: "+e.code+" - "+e.message);
-
- }finally{
-
-  button.disabled = false;
-
+ }catch(error){
+  alert("Mesaj gönderilemedi: " + error.message);
  }
-
-};
-
-// ROOM SWITCH
-
-document.querySelectorAll("[data-room]").forEach(button => {
-
- button.onclick = () => {
-
-  currentRoom = button.dataset.room;
-
-  document.querySelectorAll("[data-room]")
-   .forEach(b => b.classList.remove("active"));
-
-  button.classList.add("active");
-
-  $("roomTitle").textContent = "# "+currentRoom;
-
-  loadMessages();
-
- };
-
 });
 
+// LOGOUT
+$("logoutBtn").onclick = async()=>{
+ if(unsubscribeMessages) unsubscribeMessages();
+ unsubscribeMessages = null;
+ await signOut(auth);
+};
 </script>
-
 </body>
 </html>
