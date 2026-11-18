@@ -1,133 +1,235 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostLink // Secure Terminal</title>
+    <title>GhostLink - Terminal Chat</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
-        body { background-color: #0b0f0b; color: #00ff66; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* GİRİŞ EKRANI */
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050705; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .auth-box { border: 1px solid #00ff66; padding: 30px; background: #0b0f0b; text-align: center; box-shadow: 0 0 25px rgba(0, 255, 102, 0.15); width: 380px; }
-        .auth-box h2 { margin-bottom: 10px; font-size: 22px; letter-spacing: 3px; }
-        .auth-box p { font-size: 11px; color: #00aa44; margin-bottom: 20px; line-height: 1.4; }
-        .auth-box input { width: 100%; padding: 12px; background: #000; border: 1px solid #00ff66; color: #00ff66; margin-bottom: 12px; outline: none; text-align: center; font-size: 14px; }
-        .auth-box input::placeholder { color: #005522; }
-        .auth-box button { width: 100%; padding: 12px; background: #00ff66; color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.2s; margin-top: 5px; }
-        .auth-box button:hover { background: #00cc52; }
-        .toggle-mode { margin-top: 15px; font-size: 11px; color: #00aa44; cursor: pointer; text-decoration: underline; }
-        #auth-error { color: #ff3333; font-size: 12px; margin-top: 12px; min-height: 16px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* Yazılara tıklandığında kopyalama/seçilme sorununu ve mavi işareti önler */
+            user-select: none; 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
 
-        /* ANA UYGULAMA */
-        #app-container { display: none; height: 100vh; flex-direction: row; }
-        
-        /* SIDEBAR (ODALAR) */
-        sidebar { width: 260px; background: #070a07; border-right: 1px solid #1a331a; display: flex; flex-direction: column; justify-content: space-between; }
-        .sidebar-header { padding: 20px; font-size: 18px; border-bottom: 1px solid #1a331a; font-weight: bold; letter-spacing: 1px; }
-        .room-list { list-style: none; padding: 10px 0; }
-        .room-item { padding: 14px 20px; cursor: pointer; color: #00aa44; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
-        .room-item:hover { background: #0f1a0f; color: #00ff66; }
-        .room-item.active { background: #142614; color: #00ff66; border-left: 3px solid #00ff66; }
-        
-        .room-item.admin-room { color: #3399ff; border-top: 1px solid #1a2633; margin-top: 10px; }
-        .room-item.admin-room:hover { background: #0a141f; color: #66b3ff; }
-        .room-item.admin-room.active { background: #0f1f33; color: #66b3ff; border-left: 3px solid #3399ff; }
+        body {
+            background-color: #0b0e14;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-        .user-status-bar { padding: 15px 20px; border-top: 1px solid #1a331a; font-size: 12px; background: #050705; }
-        .logout-btn { margin-top: 8px; background: transparent; border: 1px solid #ff3333; color: #ff3333; padding: 4px 8px; font-size: 11px; cursor: pointer; width: 100%; }
-        .logout-btn:hover { background: #ff3333; color: #000; }
+        /* Giriş Ekranı */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0b0e14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-        /* CHAT ALANI */
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0f0b; }
-        .chat-header { padding: 20px; border-bottom: 1px solid #1a331a; font-size: 16px; background: #070a07; display: flex; justify-content: space-between; align-items: center; }
-        .room-desc { font-size: 12px; color: #008833; }
-        .messages-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        
-        .message { background: #0f170f; border: 1px solid #1a331a; padding: 12px; max-width: 75%; word-break: break-word; border-radius: 2px; }
-        .message.admin-msg { border-color: #1a334d; background: #0b1117; }
-        
-        .name-admin { color: #3399ff !important; font-weight: bold; }
-        .name-user { color: #00ff66 !important; font-weight: bold; }
-        
-        .message .user-header { font-size: 12px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-        .badge-admin { background: #003366; color: #66b3ff; padding: 1px 5px; font-size: 10px; border: 1px solid #3399ff; }
-        .message .text { font-size: 14px; color: #e0ffe0; line-height: 1.4; }
-        .message .time { font-size: 10px; color: #006622; margin-top: 6px; text-align: right; }
+        .login-box {
+            border: 1px solid #00ff66;
+            padding: 30px;
+            width: 320px;
+            background: #111622;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+            text-align: center;
+        }
 
-        .chat-input-area { padding: 20px; background: #070a07; border-top: 1px solid #1a331a; display: flex; gap: 10px; }
-        .chat-input-area input { flex: 1; padding: 12px; background: #000; border: 1px solid #1a331a; color: #00ff66; outline: none; }
-        .chat-input-area input:focus { border-color: #00ff66; }
-        .chat-input-area input:disabled { background: #0a0a0a; border-color: #331111; color: #aa3333; cursor: not-allowed; }
-        .chat-input-area button { padding: 0 25px; background: #00ff66; color: #000; border: none; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
-        .chat-input-area button:hover:not(:disabled) { background: #00cc52; }
-        .chat-input-area button:disabled { background: #222; color: #555; cursor: not-allowed; }
+        .login-box h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            letter-spacing: 2px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            background: #05070a;
+            border: 1px solid #00ff66;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background: #00ff66;
+            border: none;
+            color: #0b0e14;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-box button:hover {
+            background: #00cc52;
+            box-shadow: 0 0 10px #00ff66;
+        }
+
+        /* Ana Uygulama */
+        #app-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: #111622;
+            border-bottom: 1px solid #00ff66;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rooms {
+            display: flex;
+            gap: 10px;
+        }
+
+        .room-btn {
+            background: transparent;
+            border: 1px solid #00ff66;
+            color: #00ff66;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+        }
+
+        .room-btn.active {
+            background: #00ff66;
+            color: #0b0e14;
+            font-weight: bold;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            background: #111622;
+            border-left: 3px solid #00ff66;
+            padding: 10px;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .message .username {
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Admin Kullanıcı Rengi ve Stili */
+        .message .username.admin-user {
+            color: #00bfff !important; /* Mavi renk */
+            text-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
+        }
+
+        .admin-badge {
+            font-size: 11px;
+            background: #00bfff;
+            color: #0b0e14;
+            padding: 1px 4px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .input-area {
+            padding: 15px;
+            background: #111622;
+            border-top: 1px solid #00ff66;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            background: #05070a;
+            border: 1px solid #00ff66;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            outline: none;
+        }
+
+        .input-area button {
+            padding: 10px 20px;
+            background: #00ff66;
+            border: none;
+            color: #0b0e14;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .input-area button:hover {
+            background: #00cc52;
+        }
     </style>
 </head>
 <body>
 
-    <!-- GİRİŞ EKRANI -->
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h2 id="auth-title">// GHOSTLINK_</h2>
-            <p id="auth-desc">E-posta ve şifrenizle giriş yapın.</p>
-            
-            <input type="text" id="username-input" placeholder="Rumuzunuz (Görünecek İsim)" autocomplete="off">
-            <input type="email" id="email-input" placeholder="E-posta Adresi" autocomplete="off">
-            <input type="password" id="password-input" placeholder="Şifre (En az 6 karakter)" autocomplete="off" onkeypress="if(event.key==='Enter') handleAuth()">
-            
-            <button id="auth-btn" onclick="handleAuth()">SİSTEME BAĞLAN</button>
-            <div class="toggle-mode" onclick="toggleMode()">Hesabın yok mu? Kayıt ol</div>
-            <div id="auth-error"></div>
+    <!-- GİRİŞ EKRANI (Sadece İsim İster) -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>GHOSTLINK</h2>
+            <input type="text" id="username-input" placeholder="İsminizi yazın..." autocomplete="off">
+            <button onclick="enterChat()">GİRİŞ YAP</button>
         </div>
     </div>
 
-    <!-- ANA PLATFORM -->
+    <!-- SOHBET EKRANI -->
     <div id="app-container">
-        <sidebar>
-            <div>
-                <div class="sidebar-header">// KANALLAR</div>
-                <ul class="room-list" id="room-list">
-                    <li class="room-item active" onclick="switchRoom('general', this)">
-                        <span># genel-sohbet</span>
-                    </li>
-                    <li class="room-item" onclick="switchRoom('announcements', this)">
-                        <span># duyurular</span>
-                    </li>
-                    <li class="room-item admin-room" id="admin-room-btn" style="display: none;" onclick="switchRoom('admin_hq', this)">
-                        <span># yonetici-odasi</span>
-                    </li>
-                </ul>
+        <header>
+            <div class="rooms">
+                <button class="room-btn active" onclick="switchRoom('General')">#General</button>
+                <button class="room-btn" onclick="switchRoom('Cyber Security')">#CyberSecurity</button>
+                <button class="room-btn" onclick="switchRoom('Linux')">#Linux</button>
             </div>
+            <div id="current-user-display" style="font-size: 13px; color: #888;"></div>
+        </header>
 
-            <div class="user-status-bar">
-                <div>Bağlı: <span id="display-username"></span></div>
-                <div>Yetki: <span id="display-role"></span></div>
-                <button class="logout-btn" onclick="logoutUser()">OTURUMU KAPAT</button>
-            </div>
-        </sidebar>
+        <div class="chat-area" id="chat-messages">
+            <!-- Mesajlar buraya gelecek -->
+        </div>
 
-        <div class="chat-area">
-            <div class="chat-header">
-                <span id="current-room-title"># genel-sohbet</span>
-                <span class="room-desc" id="current-room-desc">Herkes mesaj yazabilir ve okuyabilir.</span>
-            </div>
-            <div class="messages-container" id="messages"></div>
-            <div class="chat-input-area">
-                <input type="text" id="message-input" placeholder="Mesajınızı yazın..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMessage()">
-                <button id="send-btn" onclick="sendMessage()">GÖNDER</button>
-            </div>
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Mesajını yaz..." onkeypress="checkEnter(event)" autocomplete="off">
+            <button onclick="sendMessage()">GÖNDER</button>
         </div>
     </div>
 
-    <!-- Firebase SDK (Modular v10) -->
+    <!-- Firebase SDK'ları -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // KENDİ FIREBASE BİLGİLERİNİ BURAYA YAPIŞTIR
+        // BURAYA KENDİ FIREBASE YAPILANDIRMANI YAPIŞTIRMALISIN
         const firebaseConfig = {
             apiKey: "SENIN_API_KEY",
             authDomain: "SENIN_AUTH_DOMAIN",
@@ -141,226 +243,114 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
-        let currentRole = null; 
-        let currentRoom = "general";
+        let currentUsername = "";
+        let currentRoom = "General";
         let unsubscribeMessages = null;
-        let isRegisterMode = false;
 
-        window.toggleMode = function() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerText = isRegisterMode ? "// GHOSTLINK_ KAYIT" : "// GHOSTLINK_";
-            document.getElementById('auth-desc').innerText = isRegisterMode ? "Yeni hesap oluşturarak sisteme katılın." : "E-posta ve şifrenizle giriş yapın.";
-            document.getElementById('auth-btn').innerText = isRegisterMode ? "KAYIT OL VE BAĞLAN" : "SİSTEME BAĞLAN";
-            document.querySelector('.toggle-mode').innerText = isRegisterMode ? "Zaten hesabın var mı? Giriş yap" : "Hesabın yok mu? Kayıt ol";
-            document.getElementById('auth-error').innerText = "";
-        };
+        // Admin olarak tanınacak isim (Bunu kendi isminle değiştirebilirsin)
+        const ADMIN_NAME = "Admin"; 
 
-        window.handleAuth = async function() {
-            const username = document.getElementById('username-input').value.trim();
-            const email = document.getElementById('email-input').value.trim();
-            const password = document.getElementById('password-input').value.trim();
-            const errorBox = document.getElementById('auth-error');
-            errorBox.innerText = "";
-
-            if (!email || !password || (isRegisterMode && !username)) {
-                errorBox.innerText = "HATA: Tüm alanları doldurun.";
+        window.enterChat = async function() {
+            const inputVal = document.getElementById("username-input").value.trim();
+            if (!inputVal) {
+                alert("Lütfen bir isim girin!");
                 return;
             }
+
+            currentUsername = inputVal;
 
             try {
-                if (isRegisterMode) {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    await setDoc(doc(db, "users", userCredential.user.uid), { username: username, email: email });
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                }
-            } catch (error) {
-                console.error("Kimlik doğrulama hatası:", error);
-                errorBox.innerText = "Hata: " + error.message;
-            }
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // E-posta adresinin veritabanındaki "admins" koleksiyonunda olup olmadığını güvenle kontrol et
-                let isAdmin = false;
-                try {
-                    const adminDocRef = doc(db, "admins", user.email);
-                    const adminSnap = await getDoc(adminDocRef);
-                    if (adminSnap.exists() && adminSnap.data().role === 'admin') {
-                        isAdmin = true;
-                    }
-                } catch (e) {
-                    console.error("Admin yetkisi sorgulama hatası:", e);
-                }
-
-                currentRole = isAdmin ? 'admin' : 'user';
-
-                const userDocSnap = await getDoc(doc(db, "users", user.uid));
-                if (userDocSnap.exists()) {
-                    currentUser = userDocSnap.data().username;
-                } else {
-                    currentUser = user.email.split('@')[0];
-                }
-
-                setupUI();
-            } else {
-                document.getElementById('auth-screen').style.display = 'flex';
-                document.getElementById('app-container').style.display = 'none';
-            }
-        });
-
-        function setupUI() {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app-container').style.display = 'flex';
-
-            const nameSpan = document.getElementById('display-username');
-            const roleSpan = document.getElementById('display-role');
-
-            nameSpan.innerText = currentUser;
-
-            if (currentRole === 'admin') {
-                nameSpan.className = 'name-admin';
-                roleSpan.innerText = 'YÖNETİCİ (ADMIN)';
-                roleSpan.style.color = '#3399ff';
-                document.getElementById('admin-room-btn').style.display = 'flex';
-            } else {
-                nameSpan.className = 'name-user';
-                roleSpan.innerText = 'ÜYE (USER)';
-                roleSpan.style.color = '#00ff66';
-                document.getElementById('admin-room-btn').style.display = 'none';
-            }
-
-            switchRoom('general', document.querySelector('.room-item.active'));
-        }
-
-        window.switchRoom = function(roomName, element) {
-            if (roomName === 'admin_hq' && currentRole !== 'admin') {
-                alert("YETKİSİZ ERİŞİM: Bu odaya sadece yöneticiler girebilir.");
-                return;
-            }
-
-            currentRoom = roomName;
-            document.querySelectorAll('.room-item').forEach(item => item.classList.remove('active'));
-            if (element) element.classList.add('active');
-
-            const titleEl = document.getElementById('current-room-title');
-            const descEl = document.getElementById('current-room-desc');
-            const msgInput = document.getElementById('message-input');
-            const sendBtn = document.getElementById('send-btn');
-
-            if (roomName === 'general') {
-                titleEl.innerText = "# genel-sohbet";
-                titleEl.style.color = "#00ff66";
-                descEl.innerText = "Tüm üyeler ve yöneticiler mesajlaşabilir.";
-                msgInput.disabled = false;
-                sendBtn.disabled = false;
-                msgInput.placeholder = "Genel sohbete mesaj yazın...";
-            } 
-            else if (roomName === 'announcements') {
-                titleEl.innerText = "# duyurular";
-                titleEl.style.color = "#ffcc00";
-                descEl.innerText = "Operasyon ve sistem duyuruları (Sadece yöneticiler yazabilir).";
+                // E-posta/şifre sormadan doğrudan Firebase Anonim Oturumu açıyoruz
+                await signInAnonymously(auth);
                 
-                if (currentRole === 'admin') {
-                    msgInput.disabled = false;
-                    sendBtn.disabled = false;
-                    msgInput.placeholder = "Tüm kullanıcılara duyuru yayınlayın...";
-                } else {
-                    msgInput.disabled = true;
-                    sendBtn.disabled = true;
-                    msgInput.placeholder = "Bu kanala sadece yöneticiler duyuru yazabilir.";
-                }
-            } 
-            else if (roomName === 'admin_hq') {
-                titleEl.innerText = "# yonetici-odasi";
-                titleEl.style.color = "#3399ff";
-                descEl.innerText = "Gizli kanal: Sadece yöneticiler görebilir ve yazabilir.";
-                msgInput.disabled = false;
-                sendBtn.disabled = false;
-                msgInput.placeholder = "Yöneticiler arası gizli mesaj yazın...";
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("app-container").style.display = "flex";
+                document.getElementById("current-user-display").innerText = `Kullanıcı: ${currentUsername}`;
+                
+                loadMessages();
+            } catch (error) {
+                console.error("Giriş hatası:", error);
+                alert("Bağlantı hatası oluştu.");
             }
-
-            loadMessages(roomName);
         };
-
-        function loadMessages(roomName) {
-            const messagesContainer = document.getElementById('messages');
-            messagesContainer.innerHTML = "";
-
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-            }
-
-            const q = query(collection(db, "channels", roomName, "messages"), orderBy("timestamp", "asc"));
-
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = "";
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const msgDiv = document.createElement('div');
-                    const isMsgAdmin = data.role === 'admin';
-                    
-                    msgDiv.className = isMsgAdmin ? 'message admin-msg' : 'message';
-                    
-                    const timeStr = data.timestamp 
-                        ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                        : '...';
-
-                    const nameClass = isMsgAdmin ? 'name-admin' : 'name-user';
-                    const adminBadge = isMsgAdmin ? '<span class="badge-admin">ADMIN</span>' : '';
-
-                    msgDiv.innerHTML = `
-                        <div class="user-header">
-                            <span class="${nameClass}">${escapeHtml(data.user)}</span>
-                            ${adminBadge}
-                        </div>
-                        <div class="text">${escapeHtml(data.text)}</div>
-                        <div class="time">${timeStr}</div>
-                    `;
-                    messagesContainer.appendChild(msgDiv);
-                });
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
-        }
 
         window.sendMessage = async function() {
-            const input = document.getElementById('message-input');
-            const text = input.value.trim();
-            if (!text || !currentUser) return;
+            const msgInput = document.getElementById("message-input");
+            const text = msgInput.value.trim();
+            if (!text || !currentUsername) return;
 
-            if ((currentRoom === 'announcements' || currentRoom === 'admin_hq') && currentRole !== 'admin') {
-                alert("Bu odaya mesaj gönderme yetkiniz yok!");
-                return;
-            }
+            // İsmin tam olarak admin adına eşit olup olmadığını kontrol et
+            const isAdmin = (currentUsername === ADMIN_NAME);
 
             try {
-                await addDoc(collection(db, "channels", currentRoom, "messages"), {
-                    user: currentUser,
-                    role: currentRole,
+                await addDoc(collection(db, "chats", currentRoom, "messages"), {
+                    username: currentUsername,
                     text: text,
-                    timestamp: serverTimestamp()
+                    isAdmin: isAdmin,
+                    createdAt: serverTimestamp()
                 });
-                input.value = "";
+                msgInput.value = "";
             } catch (error) {
                 console.error("Mesaj gönderme hatası:", error);
-                alert("Mesaj gönderilemedi!");
             }
         };
 
-        window.logoutUser = async function() {
-            await signOut(auth);
-            location.reload();
+        window.checkEnter = function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
         };
 
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+        window.switchRoom = function(roomName) {
+            currentRoom = roomName;
+            
+            // Buton aktiflik sınıflarını değiştir
+            document.querySelectorAll('.room-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.includes(roomName)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            loadMessages();
+        };
+
+        function loadMessages() {
+            const chatContainer = document.getElementById("chat-messages");
+            chatContainer.innerHTML = "";
+
+            if (unsubscribeMessages) {
+                unsubscribeMessages(); // Önceki dinleyiciyi kapat
+            }
+
+            const q = query(collection(db, "chats", currentRoom, "messages"), orderBy("createdAt", "asc"));
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                chatContainer.innerHTML = "";
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = "message";
+
+                    const nameSpan = document.createElement("span");
+                    nameSpan.className = "username";
+                    nameSpan.innerText = data.username + ":";
+
+                    // Admin kontrolü (Tıpatıp aynıysa mavi renk ve rozet ekle)
+                    if (data.username === ADMIN_NAME || data.isAdmin) {
+                        nameSpan.classList.add("admin-user");
+                        nameSpan.innerHTML = `${data.username} <span class="admin-badge">ADMIN</span>:`;
+                    }
+
+                    const textSpan = document.createElement("span");
+                    textSpan.innerText = " " + data.text;
+
+                    msgDiv.appendChild(nameSpan);
+                    msgDiv.appendChild(textSpan);
+                    chatContainer.appendChild(msgDiv);
+                });
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
         }
     </script>
 </body>
