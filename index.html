@@ -4,189 +4,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GhostLink Network</title>
+<meta name="theme-color" content="#030806">
+<title>GhostLink | Network</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+ background:#030806;
+ color:#00ff80;
+ font-family:monospace;
+ min-height:100vh;
 }
 
-body {
-  background: #030806;
-  color: #00ff80;
-  font-family: monospace;
-  min-height: 100vh;
+header{
+ text-align:center;
+ padding:25px 12px;
+ background:#07130c;
+ border-bottom:1px solid #00ff8055;
 }
 
-header {
-  padding: 24px 12px;
-  text-align: center;
-  background: #07130c;
-  border-bottom: 1px solid #00ff8055;
+header h1{
+ font-size:34px;
+ letter-spacing:6px;
+ text-shadow:0 0 18px #00ff80;
 }
 
-header h1 {
-  font-size: 32px;
-  letter-spacing: 5px;
-  text-shadow: 0 0 15px #00ff80;
+header p{color:#548b68;margin-top:8px}
+
+.container{
+ max-width:900px;
+ margin:25px auto;
+ padding:12px;
 }
 
-header p {
-  color: #548b68;
-  margin-top: 8px;
+.panel{
+ background:#08110c;
+ border:1px solid #00ff8055;
+ border-radius:12px;
+ padding:20px;
+ box-shadow:0 0 20px #00ff8015;
 }
 
-.container {
-  max-width: 900px;
-  margin: 25px auto;
-  padding: 12px;
+h2,h3{margin-bottom:15px}
+
+input,button{
+ width:100%;
+ padding:14px;
+ margin-top:12px;
+ background:#020604;
+ color:#00ff80;
+ border:1px solid #00ff8066;
+ border-radius:6px;
+ font-family:monospace;
+ outline:none;
 }
 
-.panel {
-  background: #08110c;
-  border: 1px solid #00ff8044;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 0 20px #00ff8010;
+input:focus{
+ border-color:#00ff80;
+ box-shadow:0 0 12px #00ff8033;
 }
 
-h2, h3 {
-  margin-bottom: 15px;
+button{
+ background:#06351e;
+ cursor:pointer;
+ font-weight:bold;
 }
 
-input, button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 12px;
-  background: #020604;
-  color: #00ff80;
-  border: 1px solid #00ff8066;
-  border-radius: 5px;
-  font-family: monospace;
-  outline: none;
+button:hover{
+ background:#00ff80;
+ color:#000;
 }
 
-input:focus {
-  border-color: #00ff80;
-  box-shadow: 0 0 10px #00ff8033;
+button:disabled{
+ opacity:.5;
+ cursor:wait;
 }
 
-button {
-  background: #06351e;
-  cursor: pointer;
-  font-weight: bold;
+.hidden{display:none!important}
+
+#authStatus{
+ margin-top:15px;
+ color:#ff6666;
+ overflow-wrap:anywhere;
 }
 
-button:hover {
-  background: #00ff80;
-  color: #000;
+.rooms{
+ display:flex;
+ flex-wrap:wrap;
+ gap:8px;
+ margin:15px 0;
 }
 
-.hidden {
-  display: none !important;
+.rooms button{
+ flex:1;
+ min-width:105px;
 }
 
-#authStatus {
-  margin-top: 15px;
-  color: #ff5555;
-  overflow-wrap: anywhere;
+.rooms button.active{
+ background:#00ff80;
+ color:#000;
 }
 
-.rooms {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin: 15px 0;
+#messages{
+ height:350px;
+ overflow-y:auto;
+ background:#020604;
+ border:1px solid #145d39;
+ padding:12px;
+ border-radius:6px;
 }
 
-.rooms button {
-  flex: 1;
-  min-width: 105px;
+.message{
+ padding:12px;
+ margin-bottom:10px;
+ background:#0b1910;
+ border-left:3px solid #00ff80;
+ overflow-wrap:anywhere;
 }
 
-.rooms button.active {
-  background: #00ff80;
-  color: black;
+.username{
+ color:#00ff80;
+ font-weight:bold;
 }
 
-#messages {
-  height: 350px;
-  overflow-y: auto;
-  background: #020604;
-  border: 1px solid #145d39;
-  padding: 12px;
-  border-radius: 5px;
+.admin{
+ color:#3995ff;
+ font-weight:bold;
 }
 
-.message {
-  padding: 12px;
-  margin-bottom: 10px;
-  background: #0b1910;
-  border-left: 3px solid #00ff80;
-  overflow-wrap: anywhere;
+.admin-badge{
+ color:#3995ff;
+ border:1px solid #3995ff;
+ padding:2px 5px;
+ border-radius:4px;
+ font-size:10px;
+ margin-left:6px;
 }
 
-.message .username {
-  color: #00ff80;
-  font-weight: bold;
+.message small{
+ display:block;
+ color:#668875;
+ margin-top:7px;
 }
 
-.message .admin {
-  color: #3995ff;
-  font-weight: bold;
+#chatForm{
+ display:flex;
+ gap:8px;
+ margin-top:10px;
 }
 
-.admin-badge {
-  color: #3995ff;
-  border: 1px solid #3995ff;
-  padding: 2px 5px;
-  border-radius: 4px;
-  font-size: 10px;
-  margin-left: 5px;
+#chatForm input{flex:1}
+#chatForm button{width:90px}
+
+.status{
+ color:#00ff80;
+ margin-bottom:12px;
 }
 
-.message small {
-  display: block;
-  color: #668875;
-  margin-top: 7px;
+.admin-text{
+ color:#3995ff;
+ font-weight:bold;
 }
 
-#chatForm {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
+footer{
+ text-align:center;
+ padding:25px;
+ color:#426b53;
 }
 
-#chatForm input {
-  flex: 1;
-}
-
-#chatForm button {
-  width: 90px;
-}
-
-.status {
-  color: #00ff80;
-  margin-bottom: 10px;
-}
-
-.admin-text {
-  color: #3995ff;
-  font-weight: bold;
-}
-
-footer {
-  padding: 25px;
-  text-align: center;
-  color: #426b53;
-}
-
-@media(max-width:500px) {
-  #chatForm button {
-    width: 75px;
-  }
+@media(max-width:500px){
+ header h1{font-size:28px}
+ #chatForm button{width:75px}
+ .panel{padding:15px}
 }
 </style>
 </head>
@@ -194,121 +184,108 @@ footer {
 <body>
 
 <header>
-  <h1>GHOSTLINK</h1>
-  <p>[ SECURE COMMUNICATION NETWORK ]</p>
+ <h1>GHOSTLINK</h1>
+ <p>[ SECURE COMMUNICATION NETWORK ]</p>
 </header>
 
 <div class="container">
 
-  <!-- LOGIN -->
-  <div id="loginPanel" class="panel">
-    <h2>IDENTITY VERIFICATION</h2>
-    <p>Enter your username to access the network.</p>
+ <div id="loginPanel" class="panel">
+  <h2>IDENTITY VERIFICATION</h2>
+  <p>Enter your username to access the network.</p>
 
-    <input
-      id="username"
-      type="text"
-      maxlength="25"
-      placeholder="Kullanıcı adınızı girin..."
-    >
+  <input id="username"
+   type="text"
+   maxlength="25"
+   autocomplete="nickname"
+   placeholder="Kullanıcı adınızı girin...">
 
-    <button id="enterBtn">ENTER NETWORK</button>
+  <button id="enterBtn">ENTER NETWORK</button>
 
-    <p style="text-align:center;margin:15px 0;color:#456b51">
-      ───── OR ─────
-    </p>
+  <p style="text-align:center;margin:16px;color:#456b51">
+   ───── OR ─────
+  </p>
 
-    <button id="adminBtn">
-      ADMIN GOOGLE LOGIN
-    </button>
+  <button id="adminBtn">ADMIN GOOGLE LOGIN</button>
 
-    <p id="authStatus"></p>
+  <p id="authStatus" role="status"></p>
+ </div>
+
+ <div id="chatPanel" class="panel hidden">
+
+  <div class="status">
+   ● SYSTEM ONLINE
+   <span id="currentUser"></span>
   </div>
 
-  <!-- CHAT -->
-  <div id="chatPanel" class="panel hidden">
+  <button id="logoutBtn">LOGOUT</button>
 
-    <div class="status">
-      ● SYSTEM ONLINE
-      <span id="currentUser"></span>
-    </div>
+  <h3 style="margin-top:20px">CHAT CHANNELS</h3>
 
-    <button id="logoutBtn">LOGOUT</button>
-
-    <h3 style="margin-top:20px">CHAT CHANNELS</h3>
-
-    <div class="rooms">
-      <button data-room="General" class="active">General</button>
-      <button data-room="Cyber Security">Cyber Security</button>
-      <button data-room="Linux">Linux</button>
-      <button data-room="Programming">Programming</button>
-      <button data-room="Technology">Technology</button>
-    </div>
-
-    <h3 id="roomTitle"># General</h3>
-
-    <div id="messages">
-      Connecting...
-    </div>
-
-    <form id="chatForm">
-      <input
-        id="messageInput"
-        maxlength="1000"
-        placeholder="Mesajınızı yazın..."
-        autocomplete="off"
-      >
-      <button type="submit">SEND</button>
-    </form>
-
+  <div class="rooms">
+   <button data-room="General" class="active">General</button>
+   <button data-room="Cyber Security">Cyber Security</button>
+   <button data-room="Linux">Linux</button>
+   <button data-room="Programming">Programming</button>
+   <button data-room="Technology">Technology</button>
   </div>
+
+  <h3 id="roomTitle"># General</h3>
+
+  <div id="messages">Connecting...</div>
+
+  <form id="chatForm">
+   <input id="messageInput"
+    maxlength="1000"
+    placeholder="Mesajınızı yazın..."
+    autocomplete="off">
+   <button id="sendBtn" type="submit">SEND</button>
+  </form>
+
+ </div>
 </div>
 
-<footer>
-  GHOSTLINK NETWORK © 2026
-</footer>
+<footer>GHOSTLINK NETWORK © 2026</footer>
 
 <script type="module">
 
-import { initializeApp }
+import {initializeApp}
 from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 
 import {
-  getAuth,
-  signInAnonymously,
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged,
-  signOut
+ getAuth,
+ signInAnonymously,
+ GoogleAuthProvider,
+ signInWithPopup,
+ onAuthStateChanged,
+ signOut
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  onSnapshot,
-  serverTimestamp
+ getFirestore,
+ collection,
+ addDoc,
+ query,
+ where,
+ onSnapshot,
+ serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 // FIREBASE CONFIG
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.firebasestorage.app",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+ apiKey: "AIzaSyAvoiBmcERGKNEkdXTVbpzyfbqkJn8x0DA",
+ authDomain: "ghostlink-f0ea0.firebaseapp.com",
+ projectId: "ghostlink-f0ea0",
+ storageBucket: "ghostlink-f0ea0.firebasestorage.app",
+ messagingSenderId: "420490121530",
+ appId: "1:420490121530:web:ec8d4bc44513c50b280003",
+ measurementId: "G-BS8HBQQQB3"
 };
 
 // ADMIN EMAIL
-// Buraya kendi Google/Firebase hesabının e-postasını yaz.
 
-const ADMIN_EMAIL = "your-email@gmail.com";
+const ADMIN_EMAIL = "mhrrmovamin60@gmail.com";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -320,279 +297,300 @@ let currentRoom = "General";
 let currentUsername = "";
 let isAdmin = false;
 let unsubscribeMessages = null;
+let authReady = false;
+
+const allowedRooms = [
+ "General",
+ "Cyber Security",
+ "Linux",
+ "Programming",
+ "Technology"
+];
+
+function showError(message){
+ $("authStatus").textContent = message;
+}
 
 // NORMAL USER LOGIN
 
 $("enterBtn").onclick = async () => {
 
-  const username = $("username").value.trim();
+ const username = $("username").value.trim();
 
-  if (!username || username.length < 2) {
-    $("authStatus").textContent =
-      "Lütfen geçerli bir kullanıcı adı yazın.";
-    return;
+ if(username.length < 2 || username.length > 25){
+  showError("Kullanıcı adı 2-25 karakter olmalıdır.");
+  return;
+ }
+
+ if(username.toUpperCase() === "ADMIN"){
+  showError("ADMIN ismi sadece yöneticiye aittir.");
+  return;
+ }
+
+ if(!/^[\p{L}\p{N}_ -]+$/u.test(username)){
+  showError("Kullanıcı adında geçersiz karakter var.");
+  return;
+ }
+
+ $("enterBtn").disabled = true;
+ showError("");
+
+ try{
+
+  if(auth.currentUser){
+   await signOut(auth);
   }
 
-  if (username.toUpperCase() === "ADMIN") {
-    $("authStatus").textContent =
-      "Bu isim yalnızca doğrulanmış yöneticiye aittir.";
-    return;
-  }
+  currentUsername = username;
+  localStorage.setItem("ghostlink_username",username);
 
-  try {
-    $("enterBtn").disabled = true;
+  await signInAnonymously(auth);
 
-    // Önceki oturumu kapat.
-    if (auth.currentUser) {
-      await signOut(auth);
-    }
-
-    localStorage.setItem("ghostlink_username", username);
-
-    await signInAnonymously(auth);
-
-  } catch (error) {
-    $("authStatus").textContent = error.message;
-    $("enterBtn").disabled = false;
-  }
+ }catch(error){
+  showError("Giriş hatası: "+error.code);
+  $("enterBtn").disabled = false;
+ }
 };
 
 // ADMIN GOOGLE LOGIN
 
 $("adminBtn").onclick = async () => {
 
-  try {
-    $("adminBtn").disabled = true;
+ $("adminBtn").disabled = true;
+ showError("");
 
-    if (auth.currentUser) {
-      await signOut(auth);
-    }
+ try{
 
-    const provider = new GoogleAuthProvider();
-
-    const result = await signInWithPopup(auth, provider);
-
-    const email = result.user.email || "";
-
-    if (
-      email.toLowerCase() !== ADMIN_EMAIL.toLowerCase() ||
-      !result.user.emailVerified
-    ) {
-      await signOut(auth);
-
-      $("authStatus").textContent =
-        "Bu Google hesabı yönetici hesabı değil.";
-
-      return;
-    }
-
-    localStorage.removeItem("ghostlink_username");
-
-  } catch (error) {
-    $("authStatus").textContent = error.message;
-  } finally {
-    $("adminBtn").disabled = false;
+  if(auth.currentUser){
+   await signOut(auth);
   }
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({prompt:"select_account"});
+
+  const result = await signInWithPopup(auth,provider);
+
+  const email = (result.user.email || "").toLowerCase();
+
+  if(
+   email !== ADMIN_EMAIL.toLowerCase() ||
+   !result.user.emailVerified
+  ){
+   await signOut(auth);
+   showError("Bu Google hesabı admin hesabı değil.");
+  }
+
+ }catch(error){
+  showError("Admin giriş hatası: "+error.code);
+ }finally{
+  $("adminBtn").disabled = false;
+ }
 };
 
 // AUTH STATE
 
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth,user => {
 
-  $("enterBtn").disabled = false;
+ authReady = true;
+ $("enterBtn").disabled = false;
 
-  if (!user) {
-    $("loginPanel").classList.remove("hidden");
-    $("chatPanel").classList.add("hidden");
+ if(!user){
 
-    if (unsubscribeMessages) {
-      unsubscribeMessages();
-      unsubscribeMessages = null;
-    }
+  $("loginPanel").classList.remove("hidden");
+  $("chatPanel").classList.add("hidden");
 
-    return;
+  if(unsubscribeMessages){
+   unsubscribeMessages();
+   unsubscribeMessages = null;
   }
 
-  if (
-    user.email &&
-    user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
-    user.emailVerified
-  ) {
+  return;
+ }
 
-    isAdmin = true;
-    currentUsername = "ADMIN";
+ if(user.isAnonymous){
 
-  } else if (user.isAnonymous) {
+  isAdmin = false;
 
-    isAdmin = false;
-    currentUsername =
-      localStorage.getItem("ghostlink_username");
+  currentUsername =
+   localStorage.getItem("ghostlink_username") || "";
 
-    if (!currentUsername) {
-      signOut(auth);
-      return;
-    }
-
-  } else {
-    signOut(auth);
-    return;
+  if(!currentUsername){
+   signOut(auth);
+   return;
   }
 
-  $("loginPanel").classList.add("hidden");
-  $("chatPanel").classList.remove("hidden");
+ }else if(
+  user.email &&
+  user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
+  user.emailVerified
+ ){
 
-  $("currentUser").textContent =
-    " | " + currentUsername;
+  isAdmin = true;
+  currentUsername = "ADMIN";
 
-  $("currentUser").className =
-    isAdmin ? "admin-text" : "";
+ }else{
 
-  loadMessages();
+  showError("Yetkisiz hesap.");
+  signOut(auth);
+  return;
+ }
+
+ $("loginPanel").classList.add("hidden");
+ $("chatPanel").classList.remove("hidden");
+
+ $("currentUser").textContent = " | "+currentUsername;
+
+ $("currentUser").className =
+  isAdmin ? "admin-text" : "";
+
+ loadMessages();
 });
 
 // LOGOUT
 
 $("logoutBtn").onclick = async () => {
-  if (!isAdmin) {
-    localStorage.removeItem("ghostlink_username");
-  }
 
+ localStorage.removeItem("ghostlink_username");
+
+ try{
   await signOut(auth);
+ }catch(error){
+  showError(error.message);
+ }
 };
 
 // LOAD MESSAGES
 
-function loadMessages() {
+function loadMessages(){
 
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-  }
+ if(unsubscribeMessages){
+  unsubscribeMessages();
+ }
 
-  $("messages").textContent = "Loading messages...";
+ $("messages").textContent = "Loading messages...";
 
-  const q = query(
-    collection(db, "messages"),
-    where("room", "==", currentRoom),
-    orderBy("createdAt", "asc"),
-    limit(100)
-  );
+ const q = query(
+  collection(db,"messages"),
+  where("room","==",currentRoom)
+ );
 
-  unsubscribeMessages = onSnapshot(q, snapshot => {
+ unsubscribeMessages = onSnapshot(q,snapshot => {
 
-    $("messages").innerHTML = "";
+  const messages = [];
 
-    snapshot.forEach(doc => {
-
-      const data = doc.data();
-
-      const message = document.createElement("div");
-      message.className = "message";
-
-      const name = document.createElement("span");
-
-      name.className = data.isAdmin
-        ? "admin"
-        : "username";
-
-      name.textContent = data.username || "Anonymous";
-
-      if (data.isAdmin) {
-        const badge = document.createElement("span");
-        badge.className = "admin-badge";
-        badge.textContent = "ADMIN";
-        name.appendChild(badge);
-      }
-
-      const content = document.createElement("div");
-      content.textContent = data.text || "";
-
-      const time = document.createElement("small");
-
-      time.textContent = data.createdAt?.toDate
-        ? data.createdAt.toDate().toLocaleTimeString()
-        : "Sending...";
-
-      message.append(name, content, time);
-
-      $("messages").appendChild(message);
-
-    });
-
-    $("messages").scrollTop =
-      $("messages").scrollHeight;
-
-  }, error => {
-
-    $("messages").textContent =
-      "Database error: " + error.message;
-
+  snapshot.forEach(doc => {
+   messages.push({
+    id:doc.id,
+    ...doc.data()
+   });
   });
+
+  messages.sort((a,b) => {
+   const at = a.createdAt?.toMillis?.() || 0;
+   const bt = b.createdAt?.toMillis?.() || 0;
+   return at-bt;
+  });
+
+  const recent = messages.slice(-100);
+
+  $("messages").innerHTML = "";
+
+  recent.forEach(data => {
+
+   const message = document.createElement("div");
+   message.className = "message";
+
+   const name = document.createElement("span");
+   name.className = data.isAdmin ? "admin" : "username";
+   name.textContent = data.username || "Anonymous";
+
+   if(data.isAdmin){
+    const badge = document.createElement("span");
+    badge.className = "admin-badge";
+    badge.textContent = "ADMIN";
+    name.appendChild(badge);
+   }
+
+   const content = document.createElement("div");
+   content.textContent = data.text || "";
+
+   const time = document.createElement("small");
+
+   time.textContent = data.createdAt?.toDate
+    ? data.createdAt.toDate().toLocaleTimeString()
+    : "Sending...";
+
+   message.append(name,content,time);
+   $("messages").appendChild(message);
+  });
+
+  $("messages").scrollTop = $("messages").scrollHeight;
+
+ },error => {
+
+  $("messages").textContent =
+   "Firestore error: "+error.code;
+
+ });
 }
 
 // SEND MESSAGE
 
 $("chatForm").onsubmit = async event => {
 
-  event.preventDefault();
+ event.preventDefault();
 
-  const text = $("messageInput").value.trim();
+ const text = $("messageInput").value.trim();
 
-  if (!text || !auth.currentUser) return;
+ if(!text || !auth.currentUser) return;
 
-  if (text.length > 1000) return;
+ if(text.length > 1000) return;
 
-  const button = $("chatForm").querySelector("button");
-  button.disabled = true;
+ const button = $("sendBtn");
+ button.disabled = true;
 
-  try {
+ try{
 
-    await addDoc(collection(db, "messages"), {
+  await addDoc(collection(db,"messages"),{
+   uid:auth.currentUser.uid,
+   username:currentUsername,
+   isAdmin:isAdmin,
+   text:text,
+   room:currentRoom,
+   createdAt:serverTimestamp()
+  });
 
-      uid: auth.currentUser.uid,
+  $("messageInput").value = "";
 
-      username: currentUsername,
+ }catch(error){
 
-      isAdmin: isAdmin,
+  alert("Mesaj gönderilemedi: "+error.code);
 
-      text: text,
-
-      room: currentRoom,
-
-      createdAt: serverTimestamp()
-
-    });
-
-    $("messageInput").value = "";
-
-  } catch (error) {
-
-    alert("Mesaj gönderilemedi: " + error.message);
-
-  } finally {
-    button.disabled = false;
-  }
+ }finally{
+  button.disabled = false;
+ }
 };
 
 // ROOM SWITCH
 
-document.querySelectorAll("[data-room]")
-.forEach(button => {
+document.querySelectorAll("[data-room]").forEach(button => {
 
-  button.onclick = () => {
+ button.onclick = () => {
 
-    currentRoom = button.dataset.room;
+  currentRoom = button.dataset.room;
 
-    document.querySelectorAll("[data-room]")
-    .forEach(btn => btn.classList.remove("active"));
+  document.querySelectorAll("[data-room]")
+   .forEach(btn => btn.classList.remove("active"));
 
-    button.classList.add("active");
+  button.classList.add("active");
 
-    $("roomTitle").textContent = "# " + currentRoom;
+  $("roomTitle").textContent = "# "+currentRoom;
 
-    loadMessages();
-  };
+  loadMessages();
+ };
 });
 
 </script>
 </body>
 </html>
+ 
