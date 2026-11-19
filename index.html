@@ -17,7 +17,8 @@ button,input{font:inherit}
 #loginScreen{min-height:100%;display:grid;place-items:center;padding:18px}
 .box{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--gd);padding:26px;box-shadow:0 0 28px rgba(45,255,106,.15)}
 .logo{color:var(--g);font-size:32px;font-weight:700;letter-spacing:5px;text-align:center;text-shadow:0 0 12px var(--g)}
-.tag{color:var(--mut);font-size:12px;text-align:center;margin:8px 0 24px}
+.slogan{color:var(--g);font-size:12px;font-weight:700;letter-spacing:1px;text-align:center;margin:10px 0 6px;line-height:1.7}
+.tag{color:var(--mut);font-size:12px;text-align:center;margin:0 0 24px}
 .prompt{color:var(--gd);font-size:13px;margin-bottom:4px}
 input{width:100%;padding:12px;background:#000;border:1px solid var(--line);color:var(--g);outline:none;caret-color:var(--g)}
 input:focus{border-color:var(--g)}
@@ -37,8 +38,9 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 .who .isAdminLabel{color:var(--blue);font-weight:700}
 .who button{padding:7px 10px;font-size:12px}
 .layout{flex:1;min-height:0;display:flex}
-.side{width:200px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);padding:12px 8px;overflow-y:auto}
+.side{width:200px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);padding:12px 8px;overflow-y:auto;display:flex;flex-direction:column}
 .side h3{margin:4px 8px 10px;font-size:11px;color:var(--mut);font-weight:400}
+.sideSlogan{margin-top:auto;padding:14px 8px 4px;font-size:10px;line-height:1.7;color:var(--mut);letter-spacing:.5px}
 .room{width:100%;display:block;text-align:left;border:0;border-left:3px solid transparent;color:var(--gd);padding:12px 10px;margin:2px 0;font-weight:400;letter-spacing:0}
 .room.active{border-left-color:var(--g);background:rgba(45,255,106,.08);color:var(--g)}
 .room:hover:not(:disabled){background:rgba(45,255,106,.14);color:var(--g)}
@@ -70,6 +72,7 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
  .side{width:118px;padding:10px 4px}
  .room{font-size:12px;padding:11px 6px}
  .side h3{font-size:10px}
+ .sideSlogan{font-size:9px}
  .who .nameLabel{display:none}
 }
 @media(prefers-reduced-motion:no-preference){.cursor{animation:blink 1s steps(1) infinite}}
@@ -81,6 +84,7 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 <section id="loginScreen">
  <div class="box">
   <div class="logo">GHOSTLINK</div>
+  <div class="slogan">NO FACE.<br>NO NAME.<br>JUST GHOSTLINK.</div>
   <div class="tag">root@ghostlink:~# <span class="cursor">█</span></div>
   <div class="prompt">&gt; kullanıcı adı</div>
   <input id="username" maxlength="24" placeholder="İsmini yaz (3-24 karakter)" autocomplete="off">
@@ -103,6 +107,7 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
   <aside class="side">
    <h3>// ODALAR</h3>
    <div id="rooms"></div>
+   <div class="sideSlogan">NO FACE.<br>NO NAME.<br>JUST GHOSTLINK.</div>
   </aside>
   <main class="chat">
    <div class="head">
@@ -146,11 +151,7 @@ provider.setCustomParameters({prompt:"select_account"});
 const $=id=>document.getElementById(id);
 
 const ROOMS=[
- {id:"general",title:"# general",label:"General",desc:"Herkese açık genel sohbet",type:"normal"},
- {id:"cyber-security",title:"# cyber-security",label:"Cyber Security",desc:"Siber güvenlik, savunma ve haberler",type:"normal"},
- {id:"linux",title:"# linux",label:"Linux",desc:"Dağıtımlar, terminal ve sistem yönetimi",type:"normal"},
- {id:"programming",title:"# programming",label:"Programming",desc:"Kod, algoritma ve projeler",type:"normal"},
- {id:"technology",title:"# technology",label:"Technology",desc:"Teknoloji dünyasından konuşmalar",type:"normal"},
+ {id:"general",title:"# public",label:"Public",desc:"Herkese açık sohbet",type:"normal"},
  {id:"announcements",title:"📢 duyurular",label:"📢 Duyurular",desc:"Duyuruları herkes okuyabilir. Yalnızca admin yazabilir.",type:"announce"},
  {id:"admin-chat",title:"🛡 admin-sohbeti",label:"🛡 Admin Sohbeti",desc:"Yalnızca adminler görebilir ve yazabilir.",type:"admin"}
 ];
