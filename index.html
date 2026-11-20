@@ -34,9 +34,11 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #app{height:100dvh;display:flex;flex-direction:column}
 header{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--panel);border-bottom:1px solid var(--line)}
 header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
-.who{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut)}
+.who{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut)}
 .who .isAdminLabel{color:var(--blue);font-weight:700}
 .who button{padding:7px 10px;font-size:12px}
+.who .dangerBtn{border-color:var(--red);color:var(--red)}
+.who .dangerBtn:hover:not(:disabled){background:var(--red);color:#000}
 .layout{flex:1;min-height:0;display:flex}
 .side{width:200px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);padding:12px 8px;overflow-y:auto;display:flex;flex-direction:column}
 .side h3{margin:4px 8px 10px;font-size:11px;color:var(--mut);font-weight:400}
@@ -55,8 +57,9 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 .head strong{color:var(--g)}
 .head p{margin:4px 0 0;font-size:12px;color:var(--mut)}
 #status{font-size:11px;margin-top:5px;color:var(--gd)}
-#messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:760px;overflow-wrap:anywhere;line-height:1.5;font-size:14px}
+#messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.msg{max-width:760px;overflow-wrap:anywhere;line-height:1.5;font-size:14px;padding:6px 8px;border:1px solid transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.msg.sel{background:rgba(255,77,77,.12);border-color:var(--red)}
 .msg .meta{font-size:11px;color:var(--mut)}
 .msg .nick{color:var(--g);font-weight:700}
 .msg.me .nick{color:#7dffe1}
@@ -68,6 +71,15 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
 #sendArea{display:flex;gap:8px;padding:10px;background:var(--panel);border-top:1px solid var(--line)}
 #sendArea input{flex:1;min-width:0}
 #sendArea button{flex-shrink:0;padding:0 16px}
+
+#delModal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.75);display:grid;place-items:center;padding:18px}
+.mbox{width:100%;max-width:340px;background:var(--panel);border:1px solid var(--red);padding:20px;box-shadow:0 0 24px rgba(255,77,77,.2)}
+.mbox p{margin:0 0 6px;font-size:14px;line-height:1.5}
+.mbox .warn{font-size:12px;color:var(--mut);min-height:18px;margin-bottom:10px}
+.mbox button{width:100%;margin-top:8px}
+.mbox .dangerBtn{border-color:var(--red);color:var(--red)}
+.mbox .dangerBtn:hover:not(:disabled){background:var(--red);color:#000}
+
 @media(max-width:560px){
  .side{width:118px;padding:10px 4px}
  .room{font-size:12px;padding:11px 6px}
@@ -98,6 +110,8 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
  <header>
   <strong>GHOSTLINK</strong>
   <div class="who">
+   <button class="dangerBtn hidden" id="delBtn">🗑 SİL (0)</button>
+   <button class="hidden" id="cancelSel" aria-label="Seçimi iptal et">✕</button>
    <span class="nameLabel" id="currentName"></span>
    <span class="isAdminLabel hidden" id="adminLabel">ADMIN</span>
    <button id="logout">ÇIKIŞ</button>
@@ -124,11 +138,21 @@ header strong{color:var(--g);letter-spacing:3px;text-shadow:0 0 8px var(--g)}
  </div>
 </section>
 
+<div id="delModal" class="hidden">
+ <div class="mbox">
+  <p id="delInfo"></p>
+  <div class="warn" id="delWarn"></div>
+  <button class="dangerBtn" id="delAll">HERKESTEN SİL</button>
+  <button id="delMe">BENDEN SİL</button>
+  <button id="delCancel">VAZGEÇ</button>
+ </div>
+</div>
+
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {getAuth,signInAnonymously,signInWithPopup,GoogleAuthProvider,signOut,onAuthStateChanged,updateProfile}
  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import {getFirestore,collection,addDoc,query,where,limit,onSnapshot,serverTimestamp}
+import {getFirestore,collection,addDoc,deleteDoc,doc,query,where,limit,onSnapshot,serverTimestamp}
  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig={
@@ -160,6 +184,30 @@ let activeRoom="general";
 let isAdmin=false;
 let stop=null;
 
+// SİLME / SEÇİM
+const HKEY="ghostlink_hidden";
+let hidden=new Set();
+try{hidden=new Set(JSON.parse(localStorage.getItem(HKEY)||"[]"));}catch(e){}
+function saveHidden(){
+ try{localStorage.setItem(HKEY,JSON.stringify([...hidden].slice(-2000)));}catch(e){}
+}
+const selected=new Set();
+const owners=new Map();
+
+function updateSelUI(){
+ const n=selected.size;
+ $("delBtn").classList.toggle("hidden",n===0);
+ $("cancelSel").classList.toggle("hidden",n===0);
+ $("delBtn").textContent="🗑 SİL ("+n+")";
+ document.querySelectorAll(".msg").forEach(el=>el.classList.toggle("sel",selected.has(el.dataset.id)));
+}
+function clearSel(){selected.clear();updateSelUI();}
+function addSel(id){selected.add(id);navigator.vibrate?.(30);updateSelUI();}
+function toggleSel(id){
+ if(selected.has(id))selected.delete(id);else selected.add(id);
+ updateSelUI();
+}
+
 const isAdminUser=u=>!!u && !u.isAnonymous && (u.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
 
 function visibleRooms(){
@@ -183,6 +231,7 @@ function selectRoom(id){
  const r=ROOMS.find(x=>x.id===id);
  if(!r||(r.type==="admin"&&!isAdmin))return;
  activeRoom=id;
+ clearSel();
  document.querySelectorAll(".room").forEach(b=>b.classList.toggle("active",b.dataset.room===id));
  $("roomTitle").textContent=r.title;
  $("roomDesc").textContent=r.desc;
@@ -195,6 +244,33 @@ function selectRoom(id){
  loadMessages();
 }
 
+function showEmpty(area){
+ const e=document.createElement("div");
+ e.className="empty";
+ e.textContent="Bu odada henüz mesaj yok.";
+ area.appendChild(e);
+}
+
+function attachSelectHandlers(row,id){
+ let timer=null,longPressed=false,sx=0,sy=0;
+ const cancel=()=>{clearTimeout(timer);timer=null;};
+ row.addEventListener("pointerdown",ev=>{
+  if(ev.pointerType==="mouse"&&ev.button!==0)return;
+  longPressed=false;sx=ev.clientX;sy=ev.clientY;
+  cancel();
+  timer=setTimeout(()=>{longPressed=true;addSel(id);},1000);
+ });
+ row.addEventListener("pointermove",ev=>{
+  if(Math.abs(ev.clientX-sx)>10||Math.abs(ev.clientY-sy)>10)cancel();
+ });
+ ["pointerup","pointercancel","pointerleave"].forEach(t=>row.addEventListener(t,cancel));
+ row.addEventListener("click",()=>{
+  if(longPressed){longPressed=false;return;}
+  if(selected.size>0)toggleSel(id);
+ });
+ row.addEventListener("contextmenu",ev=>ev.preventDefault());
+}
+
 function loadMessages(){
  if(stop)stop();
  const area=$("messages");
@@ -205,21 +281,23 @@ function loadMessages(){
 
  stop=onSnapshot(q,snap=>{
   area.replaceChildren();
-  const docs=snap.docs.slice().sort((a,b)=>
-   (a.data().createdAt?.toMillis?.()||Date.now())-(b.data().createdAt?.toMillis?.()||Date.now()));
+  owners.clear();
 
-  if(!docs.length){
-   const e=document.createElement("div");
-   e.className="empty";
-   e.textContent="Bu odada henüz mesaj yok.";
-   area.appendChild(e);
-  }
+  const docs=snap.docs
+   .filter(d=>!hidden.has(d.id))
+   .sort((a,b)=>
+    (a.data().createdAt?.toMillis?.()||Date.now())-(b.data().createdAt?.toMillis?.()||Date.now()));
+
+  if(!docs.length)showEmpty(area);
 
   const me=auth.currentUser?.uid;
   docs.forEach(d=>{
    const m=d.data();
+   owners.set(d.id,m.uid);
+
    const row=document.createElement("div");
    row.className="msg"+(m.uid===me?" me":"")+(m.isAdmin===true?" adm":"");
+   row.dataset.id=d.id;
 
    const meta=document.createElement("div");
    meta.className="meta";
@@ -241,8 +319,13 @@ function loadMessages(){
    text.textContent=m.text||"";
 
    row.append(meta,text);
+   attachSelectHandlers(row,d.id);
    area.appendChild(row);
   });
+
+  // silinmiş mesajları seçimden çıkar
+  [...selected].forEach(id=>{if(!owners.has(id))selected.delete(id);});
+  updateSelUI();
 
   area.scrollTop=area.scrollHeight;
   $("status").textContent="● canlı bağlantı";
@@ -250,6 +333,43 @@ function loadMessages(){
   $("status").textContent="HATA: "+err.message;
  });
 }
+
+// SİL MENÜSÜ
+function openDelModal(){
+ const uid=auth.currentUser?.uid;
+ const ids=[...selected];
+ const allOwn=ids.length>0&&ids.every(id=>owners.get(id)===uid);
+ $("delInfo").textContent=ids.length+" mesaj seçildi.";
+ $("delWarn").textContent=allOwn?"":"Seçimde başkasının mesajı var. Onları herkesten silemezsin, yalnızca senden silebilirsin.";
+ $("delAll").disabled=!allOwn;
+ $("delModal").classList.remove("hidden");
+}
+function closeDelModal(){$("delModal").classList.add("hidden");}
+
+$("delBtn").onclick=openDelModal;
+$("cancelSel").onclick=clearSel;
+$("delCancel").onclick=closeDelModal;
+
+$("delMe").onclick=()=>{
+ const ids=[...selected];
+ ids.forEach(id=>hidden.add(id));
+ saveHidden();
+ document.querySelectorAll(".msg").forEach(el=>{if(ids.includes(el.dataset.id))el.remove();});
+ if(!document.querySelector(".msg")){$("messages").replaceChildren();showEmpty($("messages"));}
+ closeDelModal();
+ clearSel();
+};
+
+$("delAll").onclick=async()=>{
+ const uid=auth.currentUser?.uid;
+ const ids=[...selected].filter(id=>owners.get(id)===uid);
+ $("delAll").disabled=true;
+ const results=await Promise.allSettled(ids.map(id=>deleteDoc(doc(db,"messages",id))));
+ const failed=results.filter(r=>r.status==="rejected");
+ closeDelModal();
+ clearSel();
+ if(failed.length)alert("Bazı mesajlar silinemedi: "+failed[0].reason.message);
+};
 
 function enterApp(user){
  isAdmin=isAdminUser(user);
@@ -336,6 +456,8 @@ onAuthStateChanged(auth,user=>{
   if(stop)stop();
   stop=null;
   isAdmin=false;
+  clearSel();
+  closeDelModal();
   $("app").classList.add("hidden");
   $("loginScreen").classList.remove("hidden");
   return;
